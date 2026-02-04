@@ -1,0 +1,268 @@
+{
+    "余总": {
+        "Name": "余总",
+        "Char": "余",
+        "Normal": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 8,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 12,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 300,
+            "Wood": 7
+        },
+        "SpecialSkill": "Young@",
+        "Description": "Young@：解除范围内所有友方单位的临时负面状态"
+    },
+    "死神": {
+        "Name": "死神",
+        "Char": "死",
+        "Normal": {
+            "Attack": 999,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 4,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 999,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 7,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 350,
+            "Wood": 6
+        },
+        "SpecialSkill": "收魂",
+        "Description": "收魂：不能攻击建筑"
+    },
+    "阿姨": {
+        "Name": "阿姨",
+        "Char": "A",
+        "Normal": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 15,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 20,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 360,
+            "Wood": 7
+        },
+        "SpecialSkill": "毒妇",
+        "Description": "毒妇：对兵100%吸血（最终伤害）畏强：每回合第n次受伤+n"
+    },
+    "海牛": {
+        "Name": "海牛",
+        "Char": "Hn",
+        "Normal": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 13,
+            "MoveRange": {
+                "Type": "-",
+                "Min": 1,
+                "Max": 5
+            }
+        },
+        "Promoted": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 16,
+            "MoveRange": {
+                "Type": "-",
+                "Min": 1,
+                "Max": 5
+            }
+        },
+        "Cost": {
+            "Gold": 390,
+            "Wood": 9
+        },
+        "SpecialSkill": "孰牛？@",
+        "Description": "孰牛？@：将*1内的敌兵变为[晋升Hn][Hn]"
+    },
+    "大师": {
+        "Name": "大师",
+        "Char": "大",
+        "Normal": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 3
+            },
+            "MaxHP": 10,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            }
+        },
+        "Promoted": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 3
+            },
+            "MaxHP": 12,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            }
+        },
+        "Cost": {
+            "Gold": 440,
+            "Wood": 13
+        },
+        "SpecialSkill": "异同",
+        "Description": "异同：可控制目标兵移动[+1][*1]"
+    },
+    "居士": {
+        "Name": "居士",
+        "Char": "居",
+        "Normal": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 14,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 7,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 19,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 490,
+            "Wood": 10
+        },
+        "SpecialSkill": "淫慢",
+        "Description": "淫慢:目标下一回合移动范围[数值变为1][变为+1]"
+    },
+    "小头": {
+        "Name": "小头",
+        "Char": "小",
+        "Normal": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 11,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 7,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 12,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 560,
+            "Wood": 15
+        },
+        "SpecialSkill": "小头",
+        "Description": "小头：闪避每回合前[1][2]次伤害(真伤除外)"
+    }
+}

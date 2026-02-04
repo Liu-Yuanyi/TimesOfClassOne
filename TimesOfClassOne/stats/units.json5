@@ -1,0 +1,1696 @@
+{
+    "小土豆": {
+        "Name": "小土豆",
+        "Char": "豆",
+        "Normal": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 7,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 10,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 130,
+            "Wood": 3
+        },
+        "Description": "脆皮：受伤+1",
+        "Skills": {
+            "脆皮": {
+                "Type": "PassiveSkill",
+                "Trigger": "CALC_DAMAGE",
+                "Effect": "Crispy",
+                "Role": "TARGET"
+            }
+        }
+    },
+    "鸡男": {
+        "Name": "鸡男",
+        "Char": "J",
+        "Normal": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 7,
+            "MoveRange": {
+                "Type": "-",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 11,
+            "MoveRange": {
+                "Type": "-",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 170,
+            "Wood": 6
+        },
+        "Description": "卖鸡：死亡时返还100金3木",
+        "Skills": {
+            "卖鸡":{
+                "Type": "PassiveSkill",
+                "Trigger": "ON_DEATH",
+                "Effect": "SellChick",
+                "Role": "SOURCE"
+            }
+        }
+    },
+    "蛋哥": {
+        "Name": "蛋哥",
+        "Char": "E",
+        "Normal": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 7,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 10,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 220,
+            "Wood": 7
+        }
+    },
+    "轻骑兵": {
+        "Name": "轻骑兵",
+        "Char": "轻",
+        "Normal": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 11,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 14,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 270,
+            "Wood": 5
+        },
+        "Description": "刺刀：对兵伤害+1",
+        "Skills": {
+            "刺刀": {
+                "Type": "PassiveSkill",
+                "Trigger": "CALC_DAMAGE",
+                "Effect": "Bayonet",
+                "Role": "SOURCE"
+            }
+        }
+    },
+    "朵谢": {
+        "Name": "朵谢",
+        "Char": "朵",
+        "Normal": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 9,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 13,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 280,
+            "Wood": 4
+        },
+        "Description": "多谢@：消耗4血为代价为攻击范围内全体友兵恢复[2][3]血",
+        "Skills": {
+            "多谢@": {
+                "Type": "ActiveSkill",
+                "Effect": "ThankYou",
+                "MoveConflict": true,
+                "AttackConflict": true
+            }
+        }
+    },
+    "弓骑兵": {
+        "Name": "弓骑兵",
+        "Char": "弓",
+        "Normal": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 10,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 14,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 280,
+            "Wood": 8
+        }
+    },
+    "卡哇伊": {
+        "Name": "卡哇伊",
+        "Char": "卡",
+        "Normal": {
+            "Attack": 1,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 1,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 1,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 3
+            },
+            "MaxHP": 1,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 280,
+            "Wood": 8
+        },
+        "Description": "吸引:攻击后可与目标交换位置(若其为兵)",
+        "Skills": {
+            "吸引": {
+                "Type": "PassiveSkill",
+                "Trigger": "ON_ATTACK",
+                "Effect": "Kawaii",
+                "Role": "SOURCE"
+            }
+        }
+    },
+    "Treasure Bear": {
+        "Name": "Treasure Bear",
+        "Char": "Tb",
+        "Normal": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 13,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 7,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 19,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 330,
+            "Wood": 8
+        },
+        "Description": "恼怒：改为攻击周围8格（不分敌我）",
+        "Skills": {
+            "环击":{
+                "Type": "Static"
+            }
+        }
+    },
+    "卷姐": {
+        "Name": "卷姐",
+        "Char": "卷",
+        "Normal": {
+            "Attack": null,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 3,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": null,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 8,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 330,
+            "Wood": 10
+        },
+        "Description": "互卷@：与范围内友兵交换位置(不算对之的操作)",
+        "Skills": {
+            "互卷@":{
+                "Type": "ActiveSkill",
+                "Effect": "Interroll",
+                "MoveConflict": true,
+                "AttackConflict": true
+            }
+        }
+    },
+    "翘": {
+        "Name": "翘",
+        "Char": "Q",
+        "Normal": {
+            "Attack": 10,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 2,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 14,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 3,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 340,
+            "Wood": 7
+        },
+        "Description": "裸衣：Q不可回血。Q可以消耗1血量，下回合移动范围变为*4",
+        "Skills": {
+            "裸衣": {
+                "Type": "ActiveSkill",
+                "Effect": "Interroll",
+                "MoveConflict": false,
+                "AttackConflict": false
+            }
+        }
+    },
+    "豹": {
+        "Name": "豹",
+        "Char": "豹",
+        "Normal": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 10,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 5
+            }
+        },
+        "Promoted": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 16,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 6
+            }
+        },
+        "Cost": {
+            "Gold": 350,
+            "Wood": 7
+        },
+        "Description": "撕裂：对兵伤害+n/2(取整)，n为目标已损血量",
+        "Skills": {
+            "撕裂":{
+                "Type": "PassiveSkill",
+                "Trigger": "CALC_DAMAGE",
+                "Effect": "TearApart",
+                "Role": "SOURCE"
+            }
+        }
+    },
+    "浆狗": {
+        "Name": "浆狗",
+        "Char": "狗",
+        "Normal": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 3,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 4
+            }
+        },
+        "Promoted": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 3,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 4
+            }
+        },
+        "Cost": {
+            "Gold": 360,
+            "Wood": 8
+        },
+        "Description": "爆浆：死亡后对周围8格造成[6][9]真实伤害，更外16格造成[2][3]伤害，建筑减半向下取整，不分敌我",
+        "Skills": {
+            "爆浆":{
+                "Type":"PassiveSkill",
+                "Trigger":"ON_DEATH",
+                "Effect": "Burst",
+                "Role": "SOURCE"
+            }
+        }
+    },
+    "重骑兵": {
+        "Name": "重骑兵",
+        "Char": "Z",
+        "Normal": {
+            "Attack": 7,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 15,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 11,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 19,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 370,
+            "Wood": 15
+        }
+    },
+    "哟西": {
+        "Name": "哟西",
+        "Char": "Y",
+        "Normal": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 11,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 7,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 15,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 380,
+            "Wood": 8
+        },
+        "Description": "穿透：改为同时攻击目标与目标身后的单位（不分敌我）",
+        "Skills": {
+            "龙息" :{
+                "Type":"Static"
+            }
+        }
+    },
+    "四": {
+        "Name": "四",
+        "Char": "四",
+        "Normal": {
+            "Attack": 7,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 3
+            },
+            "MaxHP": 6,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 10,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 3
+            },
+            "MaxHP": 8,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 390,
+            "Wood": 5
+        },
+        "Description": "狙击：移动后不能攻击",
+        "Skills": {
+            "狙击":{
+                "Type":"Static"
+            }
+        }
+    },
+    "款": {
+        "Name": "款",
+        "Char": "款",
+        "Normal": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 12,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 15,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 400,
+            "Wood": 5
+        },
+        "Description": "抚慰@：为范围内一个友兵恢复[4][6]血",
+        "Skills": {
+            "抚慰@":{
+                "Type":"ActiveSkill",
+                "Effect":"Comfort",
+                "MoveConflict":true,
+                "AttackConflict":true
+            }
+        }
+    },
+    "阿坤": {
+        "Name": "阿坤",
+        "Char": "坤",
+        "Normal": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 19,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 25,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 400,
+            "Wood": 12
+        },
+        "Description": "啊？：目标下回合无法移动(不影响特技和法术)",
+        "Skills":{
+            "啊？":{
+                "Type":"PassiveSkill",
+                "Trigger":"ON_ATTACK",
+                "Effect":"Ah",
+                "Role": "SOURCE"
+            }
+        }
+    },
+    "铁匠": {
+        "Name": "铁匠",
+        "Char": "T",
+        "Normal": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 10,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 12,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 400,
+            "Wood": 12
+        },
+        "Description": "打铁：攻击范围内友兵攻击+1",
+        "Skills": {
+            "打铁":{
+                "Type":"PassiveSkill",
+                "Trigger":"CALC_ATTACK",
+                "Effect":"Blacksmith",
+                "Role": "GLOBAL"
+            }
+        }
+    },
+    "洋": {
+        "Name": "洋",
+        "Char": "洋",
+        "Normal": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 9,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 7,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 12,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 450,
+            "Wood": 13
+        },
+        "Description": "迅捷：每回合可操作两次(释放技能后二次操作)",
+        "Skills": {
+            "迅捷": {
+                "Type": "ActiveSkill",
+                "Effect": "Speed",
+                "MoveConflict": false,
+                "AttackConflict": false
+            }
+        }
+    },
+    "腰哥": {
+        "Name": "腰哥",
+        "Char": "哥",
+        "Normal": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 11,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 17,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 450,
+            "Wood": 15
+        },
+        "Description": "折腰：伤害+X，X为已损血量",
+        "Skills": {
+            "折腰":{
+                "Type":"PassiveSkill",
+                "Trigger":"CALC_DAMAGE",
+                "Effect":"BendOver",
+                "Role": "SOURCE"
+            }
+        }
+    },
+    "迈步哥": {
+        "Name": "迈步哥",
+        "Char": "迈",
+        "Normal": {
+            "Attack": 10,
+            "AttackRange": {
+                "Type": "x",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 17,
+            "MoveRange": {
+                "Type": "h",
+                "Min": 1,
+                "Max": 1
+            }
+        },
+        "Promoted": {
+            "Attack": 13,
+            "AttackRange": {
+                "Type": "x",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 23,
+            "MoveRange": {
+                "Type": "h",
+                "Min": 1,
+                "Max": 1
+            }
+        },
+        "Cost": {
+            "Gold": 460,
+            "Wood": 20
+        },
+        "Description": "不可加速",
+        "Skills": {
+            "不可加速":{
+                "Type":"Static"
+            }
+        }
+    },
+    "HappyCow": {
+        "Name": "HappyCow",
+        "Char": "HC",
+        "Normal": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 10,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 7,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 15,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 470,
+            "Wood": 12
+        },
+        "Description": "养伤：回满血量，若如此做，本回合不能移动",
+        "Skills": {
+            "养伤":{
+                "Type":"ActiveSkill",
+                "Effect":"HealInjury",
+                "MoveConflict":true,
+                "AttackConflict":false
+            }
+        }
+    },
+    "公主": {
+        "Name": "公主",
+        "Char": "公",
+        "Normal": {
+            "Attack": 2,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 5
+            },
+            "MaxHP": 5,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            }
+        },
+        "Promoted": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 5
+            },
+            "MaxHP": 7,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            }
+        },
+        "Cost": {
+            "Gold": 500,
+            "Wood": 10
+        },
+        "Description": "法王：攻击为2*2，不分敌我",
+        "Skills": {
+            "2*2":{
+                "Type":"Static"
+            }
+        }
+    },
+    "Der": {
+        "Name": "Der",
+        "Char": "D",
+        "Normal": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 13,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 7,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 18,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 500,
+            "Wood": 13
+        },
+        "Description": "魅惑:目标下一回合无法操作",
+        "Skills": {
+            "魅惑":{
+                "Type":"PassiveSkill",
+                "Trigger":"ON_ATTACK",
+                "Effect":"Charm",
+                "Role": "SOURCE"
+            }
+        }
+    },
+    "伞哥": {
+        "Name": "伞哥",
+        "Char": "伞",
+        "Normal": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 11,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 8,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 16,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 500,
+            "Wood": 13
+        },
+        "Description": "打伞：来源在*1以外的伤害最终视为1",
+        "Skills": {
+            "打伞":{
+                "Type":"PassiveSkill",
+                "Priority":-1,
+                "Trigger":"CALC_DAMAGE",
+                "Effect":"Umbrella",
+                "Role": "TARGET"
+            }
+        }
+    },
+    "金吉": {
+        "Name": "金吉",
+        "Char": "吉",
+        "Normal": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 20,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 25,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 500,
+            "Wood": 15
+        },
+        "Description": "荆棘：反伤[3][5](真实伤害)",
+        "Skills": {
+            "荆棘":{
+                "Type":"PassiveSkill",
+                "Trigger":"ON_DAMAGE_TAKEN",
+                "Effect":"Thorn",
+                "Role": "TARGET"
+            }
+        }
+    },
+    "文军": {
+        "Name": "文军",
+        "Char": "W",
+        "Normal": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            },
+            "MaxHP": 10,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            },
+            "MaxHP": 14,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 520,
+            "Wood": 11
+        },
+        "Description": "尚文：目标下回合[面板攻击力视为1][无法攻击]",
+        "Skills": {
+            "尚文":{
+                "Type":"PassiveSkill",
+                "Trigger":"ON_ATTACK",
+                "Effect":"ShangWen",
+                "Role": "SOURCE"
+            }
+        }
+    },
+    "C庆": {
+        "Name": "C庆",
+        "Char": "C",
+        "Normal": {
+            "Attack": 10,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 8,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 12,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 12,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 560,
+            "Wood": 11
+        },
+        "Description": "siu：移动无视障碍",
+        "Skills": {
+            "飞行":{
+                "Type": "Static"
+            }
+        }
+    },
+    "领袖高B": {
+        "Name": "领袖高B",
+        "Char": "Lb",
+        "Normal": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 19,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 8,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 27,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 580,
+            "Wood": 30
+        },
+        "Description": "领袖@：将*2内的一个友兵传送至边邻处本回合其伤害[+1][+2]",
+        "Skills": {
+            "领袖@":{
+                "Type":"ActiveSkill",
+                "Effect":"Leader",
+                "MoveConflict":true,
+                "AttackConflict":true
+            }
+        }
+    },
+    "天才": {
+        "Name": "天才",
+        "Char": "天",
+        "Normal": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 3,
+                "Max": 4
+            },
+            "MaxHP": 12,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            }
+        },
+        "Promoted": {
+            "Attack": 9,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 3,
+                "Max": 4
+            },
+            "MaxHP": 16,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            }
+        },
+        "Cost": {
+            "Gold": 600,
+            "Wood": 12
+        },
+        "Description": "鸿志：无法攻击完全处于*2内的单位, 移动后无法攻击",
+        "Skills": {
+            "狙击":{
+                "Type":"Static"
+            }
+        }
+    },
+    "高B": {
+        "Name": "高B",
+        "Char": "B",
+        "Normal": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 21,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 25,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 600,
+            "Wood": 20
+        },
+        "Description": "嘲讽：受伤[-1][-2],敌方攻击范围内有高B时，只能攻击高B",
+        "Skills": {
+            "减伤":{
+                "Type":"PassiveSkill",
+                "Trigger":"CALC_DAMAGE",
+                "Effect":"DamageReduction",
+                "Role": "TARGET"
+            },
+            "嘲讽":{
+                "Type":"PassiveSkill",
+                "Trigger":"CALC_ATTACK_TARGET",
+                "Effect":"Mocking",
+                "Role": "GLOBAL"
+            }
+        }
+    },
+    "愿伊": {
+        "Name": "愿伊",
+        "Char": "伊",
+        "Normal": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 17,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 7,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 21,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 630,
+            "Wood": 10
+        },
+        "Description": "穿心:攻击后可瞬移至目标格身后(若空), 若如此做, 本回合伤害+1(每回合增伤最多发动[2][3]次).歼敌后可立即再次攻击",
+        "Skills": {
+            "穿心": {
+                "Type":"PassiveSkill",
+                "Trigger":"ON_ATTACK",
+                "Effect":"HeartPenetration",
+                "Role":"SOURCE"
+            },
+            "歼敌":{
+                "Type":"PassiveSkill",
+                "Trigger":"ON_KILL",
+                "Effect":"DestroyEnemy",
+                "Role":"SOURCE"
+            }
+        },
+        "Variables":{
+            "增伤次数":{
+                "Type":"Turn",
+                "DefaultValue":0,
+                "Value":0
+            }
+        }
+    },
+    "雷龙": {
+        "Name": "雷龙",
+        "Char": "龙",
+        "Normal": {
+            "Attack": 8,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 20,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 12,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 23,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 680,
+            "Wood": 19
+        },
+        "Description": "雷电:目标周围八格受[3][5]点溅射伤害(不分敌我，但自己不受。不能空打). 移动无视障碍",
+        "Skills": {
+            "飞行":{
+                "Type": "Static"
+            },
+            "雷电":{
+                "Type": "PassiveSkill",
+                "Trigger": "ON_ATTACK",
+                "Effect": "Thunder",
+                "Role":"SOURCE"
+            }
+        }
+    },
+    "玩意": {
+        "Name": "玩意",
+        "Char": "玩",
+        "Normal": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 10,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Promoted": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 15,
+            "MoveRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 3
+            }
+        },
+        "Cost": {
+            "Gold": 360,
+            "Wood": 10
+        },
+        "Description": "彳亍：攻击后，自己与目标均眩晕[1][2]回合",
+        "Skills": {
+            "彳亍":{
+                "Type":"PassiveSkill",
+                "Trigger":"ON_ATTACK",
+                "Effect":"Stagger",
+                "Role": "SOURCE"
+            }
+        }
+    },
+    "东西": {
+        "Name": "东西",
+        "Char": "东",
+        "Normal": {
+            "Attack": 7,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 10,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 9,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 14,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 480,
+            "Wood": 14
+        },
+        "Description": "独猎：一刀击败敌方满血单位后获得100+50n金(n为溢出伤害)",
+        "Skills": {
+            "独猎":{
+                "Type":"PassiveSkill",
+                "Trigger": "ON_ATTACK",
+                "Effect":"SoloHunt",
+                "Role":"SOURCE"
+            }
+        }
+    },
+    "太子": {
+        "Name": "太子",
+        "Char": "太",
+        "Normal": {
+            "Attack": 4,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 12,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 6,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            },
+            "MaxHP": 13,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 460,
+            "Wood": 10
+        },
+        "Description": "封王：死亡时[晋升*2内满血己方兵][痊愈并晋升*2内己方兵]",
+        "Skills":{
+            "封王":{
+                "Type":"PassiveSkill",
+                "Trigger":"ON_DEATH",
+                "Effect":"Throne",
+                "Role":"SOURCE"
+            }
+        }
+    },
+    "状元": {
+        "Name": "状元",
+        "Char": "状",
+        "Normal": {
+            "Attack": 5,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 10,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Promoted": {
+            "Attack": 15,
+            "AttackRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 10,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 380,
+            "Wood": 15
+        },
+        "Description": "夺魁：击败敌方单位后晋升，血量不变",
+        "Skills": {
+            "夺魁": {
+                "Type":"PassiveSkill",
+                "Trigger":"ON_KILL",
+                "Effect":"Champion",
+                "Role":"SOURCE"
+            }
+        }
+    },
+    "黑奴": {
+        "Name": "黑奴",
+        "Char": "h",
+        "CannotPick": true,
+        "CannotPromote": true,
+        "Normal": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 5,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Description": "只生产于黑奴市场"
+    },
+    "工兵": {
+        "Name": "工兵",
+        "Char": "工",
+        "CannotPick": true,
+        "CannotPromote": true,
+        "Normal": {
+            "Attack": 3,
+            "AttackRange": {
+                "Type": "+",
+                "Min": 1,
+                "Max": 1
+            },
+            "MaxHP": 5,
+            "MoveRange": {
+                "Type": "*",
+                "Min": 1,
+                "Max": 2
+            }
+        },
+        "Cost": {
+            "Gold": 100,
+            "Wood": 7
+        },
+        "Description": "工程@:修建建筑或为边邻非敌方建筑恢2血;只产生于基地",
+        "Skills": {
+            "工程@":{
+                "Type":"ActiveSkill",
+                "Effect":"Engineer",
+                "MoveConflict":true,
+                "AttackConflict":true
+            }
+        }
+    }
+}

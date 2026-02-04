@@ -1,0 +1,34 @@
+{
+    "default_map":{
+        "Width": 20,
+        "Height": 20,
+        "Entities": [
+            {"Type": "Building", "Name": "基地", "uid": 100, "owner_id":1, "x":1, "y":1},
+            {"Type": "Building", "Name": "金矿", "uid": 101, "owner_id":1, "x":1, "y":3},
+            {"Type": "Building", "Name": "金矿", "uid": 102, "owner_id":1, "x":1, "y":4},
+            {"Type": "Building", "Name": "金矿", "uid": 103, "owner_id":1, "x":1, "y":5},
+            {"Type": "Building", "Name": "伐木场", "uid": 104, "owner_id":1, "x":3, "y":1},
+            {"Type": "Building", "Name": "伐木场", "uid": 105, "owner_id":1, "x":4, "y":1},
+            {"Type": "Building", "Name": "伐木场", "uid": 106, "owner_id":1, "x":5, "y":1},
+            {"Type": "Building", "Name": "兵营", "uid": 107, "owner_id":1, "x":3, "y":3},
+            {"Type": "Building", "Name": "箭塔", "uid": 108, "owner_id":1, "x":2, "y":5},
+            {"Type": "Building", "Name": "箭塔", "uid": 109, "owner_id":1, "x":5, "y":2},
+            {"Type": "Unit", "Name": "工兵", "uid": 150, "owner_id":1, "x":2, "y":3},
+            {"Type": "Unit", "Name": "工兵", "uid": 151, "owner_id":1, "x":3, "y":2},
+            {"Type": "Building", "Name": "基地", "uid": 200, "owner_id":2, "x":19, "y":19},
+            {"Type": "Building", "Name": "金矿", "uid": 201, "owner_id":2, "x":20, "y":18},
+            {"Type": "Building", "Name": "金矿", "uid": 202, "owner_id":2, "x":20, "y":17},
+            {"Type": "Building", "Name": "金矿", "uid": 203, "owner_id":2, "x":20, "y":16},
+            {"Type": "Building", "Name": "伐木场", "uid": 204, "owner_id":2, "x":18, "y":20},
+            {"Type": "Building", "Name": "伐木场", "uid": 205, "owner_id":2, "x":17, "y":20},
+            {"Type": "Building", "Name": "伐木场", "uid": 206, "owner_id":2, "x":16, "y":20},
+            {"Type": "Building", "Name": "兵营", "uid": 207, "owner_id":2, "x":17, "y":17},
+            {"Type": "Building", "Name": "箭塔", "uid": 208, "owner_id":2, "x":19, "y":16},
+            {"Type": "Building", "Name": "箭塔", "uid": 209, "owner_id":2, "x":16, "y":19},
+            {"Type": "Unit", "Name": "工兵", "uid": 250, "owner_id":2, "x":19, "y":18},
+            {"Type": "Unit", "Name": "工兵", "uid": 251, "owner_id":2, "x":18, "y":19},
+            {"Type": "Building", "Name": "总矿", "uid": 300, "owner_id":0, "x":3, "y":17},
+            {"Type": "Building", "Name": "总矿", "uid": 301, "owner_id":0, "x":17, "y":3}
+        ],
+    }
+}

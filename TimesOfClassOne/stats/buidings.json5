@@ -1,0 +1,338 @@
+{
+    "基地":{
+        "Name": "基地",
+        "Char": "☆",
+        "HP": 70,
+        "CannotPick": true,
+        "Size": {
+            "Width": 2,
+            "Height": 2
+        },
+        "Attackable": true,
+        "Attack": 5,
+        "AttackRange": {
+            "Type": "*",
+            "Min": 1,
+            "Max": 1
+        },
+        "Skills":{
+            "生产":{
+                "Type": "ActiveSkill",
+                "Effect":"ProduceEngineer",
+                "Cost":{
+                    "Gold":100,
+                    "Wood":7
+                }
+            }
+        },
+        "Description":"基地是每个玩家的核心建筑，可以生产工兵(边邻)。基地被摧毁则玩家失败。"
+    },
+    "总矿":{
+        "Name": "总矿",
+        "Char": "矿",
+        "HP": 30,
+        "CannotPick": true,
+        "Size": {
+            "Width": 2,
+            "Height": 2
+        },
+        "Attackable": false,
+        "Skills":{
+            "产金木":{
+                "Type":"PassiveSkill",
+                "Trigger": "ON_TURN_START",
+                "Effect":"GoldAndWoodFarm",
+                "Role":"GLOBAL"
+            },
+            "反伤":{
+                "Type":"PassiveSkill",
+                "Trigger": "ON_DAMAGE_TAKEN",
+                "Effect":"ThornArmor",
+                "Role":"TARGET"
+            },
+            "夺取":{
+                "Type":"PassiveSkill",
+                "Trigger":"ON_DEATH",
+                "Effect":"CaptureBuilding",
+                "Role":"SOURCE"
+            }
+        },
+        "Description":"游戏开始时总矿为中立建筑，血量30且反伤3（真实伤害）。一方击败中立或敌方矿后获得之，初始血量为10/30，不反伤。"
+    },
+    "兵营":{
+        "Name": "兵营",
+        "Char": "兵",
+        "HP": 10,
+        "CannotPick": true,
+        "Size": {
+            "Width": 2,
+            "Height": 2
+        },
+        "Attackable": false,
+        "Cost":{
+            "Gold": 150,
+            "Wood": 25
+        },
+        "Skills":{
+            "生产":{
+                "Type": "ActiveSkill",
+                "Effect":"ProduceSoldier"
+            }
+        },
+        "Description":"兵营可以生产单位(边邻)"
+    },
+    "金矿":{
+        "Name": "金矿",
+        "Char": "金",
+        "HP": 6,
+        "CannotPick": true,
+        "Size": {
+            "Width": 1,
+            "Height": 1
+        },
+        "Attackable": false,
+        "Cost":{
+            "Gold": 50,
+            "Wood": 5
+        },
+        "Skills":{
+            "产金":{
+                "Type":"PassiveSkill",
+                "Trigger": "ON_TURN_START",
+                "Effect":"GoldMine",
+                "Role":"GLOBAL"
+            },
+            "造价翻倍":{
+                "Type":"PassiveSkill",
+                "Trigger": "CALC_COST",
+                "Effect":"DoubleCostPerExisting",
+                "Role":"TARGET"
+            }
+        },
+        "Description":"每回合产出100金，场上每存在一个，造价翻倍。"
+    },
+    "伐木场":{
+        "Name": "伐木场",
+        "Char": "木",
+        "HP": 6,
+        "CannotPick": true,
+        "Size": {
+            "Width": 1,
+            "Height": 1
+        },
+        "Attackable": false,
+        "Cost":{
+            "Gold": 50,
+            "Wood": 5
+        },
+        "Skills":{
+            "产木":{
+                "Type":"PassiveSkill",
+                "Trigger": "ON_TURN_START",
+                "Effect":"WoodFarm",
+                "Role":"GLOBAL"
+            },
+            "造价翻倍":{
+                "Type":"PassiveSkill",
+                "Trigger": "CALC_COST",
+                "Effect":"DoubleCostPerExisting",
+                "Role":"TARGET"
+            }
+        },
+        "Description":"每回合产出5木，场上每存在一个，造价翻倍。"
+    },
+    "拒马":{
+        "Name": "拒马",
+        "Char": "~",
+        "HP": 8,
+        "Size": {
+            "Width": 1,
+            "Height": 2
+        },
+        "Attackable": false,
+        "Cost":{
+            "Gold": 20,
+            "Wood": 3
+        },
+        "AlwaysNeutral": true,
+        "Description":"中立建筑"
+    },
+    "城墙":{
+        "Name": "城墙",
+        "Char": "=",
+        "HP": 15,
+        "Size": {
+            "Width": 1,
+            "Height": 3
+        },
+        "Attackable": false,
+        "Cost":{
+            "Gold": 70,
+            "Wood": 5
+        },
+        "AlwaysNeutral": true,
+        "Description":"中立建筑"
+    },
+    "箭塔":{
+        "Name": "箭塔",
+        "Char": "Ar",
+        "HP": 12,
+        "Size": {
+            "Width": 1,
+            "Height": 1
+        },
+        "Attackable": true,
+        "Attack": 5,
+        "AttackRange": {
+            "Type": "*",
+            "Min": 1,
+            "Max": 2
+        },
+        "Cost":{
+            "Gold": 180,
+            "Wood": 16
+        }
+    },
+    "炮台":{
+        "Name": "炮台",
+        "Char": "炮",
+        "HP": 15,
+        "Size": {
+            "Width": 2,
+            "Height": 2
+        },
+        "Attackable": true,
+        "Attack": 7,
+        "AttackRange": {
+            "Type": "*",
+            "Min": 1,
+            "Max": 3
+        },
+        "Cost":{
+            "Gold": 350,
+            "Wood": 25
+        }
+    },
+    "炸弹塔":{
+        "Name": "炸弹塔",
+        "Char": "炸",
+        "HP": 12,
+        "Size": {
+            "Width": 2,
+            "Height": 2
+        },
+        "Attackable": true,
+        "Attack": 5,
+        "AttackRange": {
+            "Type": "*",
+            "Min": 1,
+            "Max": 4
+        },
+        "Cost":{
+            "Gold": 370,
+            "Wood": 25
+        },
+        "Skills":{
+            "2*2":{
+                "Type":"Static"
+            }
+        },
+        "Description":"范围2*2，不分敌我，不能击中自己"
+    },
+    "导弹井":{
+        "Name": "导弹井",
+        "Char": "导",
+        "HP": 10,
+        "Size": {
+            "Width": 2,
+            "Height": 2
+        },
+        "Attackable": false,
+        "Cost":{
+            "Gold": 650,
+            "Wood": 45
+        },
+        "Skills":{
+            "导弹攻击":{
+                "Type":"ActiveSkill",
+                "Effect":"MissileAttack",
+                "Cost":{
+                    "Gold":500,
+                    "Wood":30
+                }
+            }
+        },
+        "Description":"对一格造成30真实伤害，并对此格周围八格造成10溅射真实伤害(可以空打) (不分敌我，自己也受)"
+    },
+    "医院":{
+        "Name": "医院",
+        "Char": "医",
+        "HP": 10,
+        "Size": {
+            "Width": 1,
+            "Height": 1
+        },
+        "Attackable": false,
+        "Cost":{
+            "Gold": 200,
+            "Wood": 20
+        },
+        "Skills":{
+            "痊愈":{
+                "Type":"ActiveSkill",
+                "Effect":"HealUnit",
+                "Cost":{
+                    "Gold":60,
+                    "Wood":2
+                }
+            }
+        },
+        "Description":"痊愈一个兵(边邻)"
+    },
+    "博文诗社":{
+        "Name": "博文诗社",
+        "Char": "诗",
+        "HP": 15,
+        "Size": {
+            "Width": 2,
+            "Height": 2
+        },
+        "Attackable": false,
+        "Cost":{
+            "Gold": 200,
+            "Wood": 15
+        },
+        "Skills":{
+            "变节":{
+                "Type":"ActiveSkill",
+                "Effect":"ConvertEnemyUnit"
+            }
+        },
+        "Description":"将一个*2范围内敌兵变为我兵(该兵本回合不能操作)"
+    },
+    "黑奴市场":{
+        "Name": "黑奴市场",
+        "Char": "黑",
+        "HP": 10,
+        "Size": {
+            "Width": 1,
+            "Height": 1
+        },
+        "Attackable": false,
+        "Cost":{
+            "Gold": 250,
+            "Wood": 12
+        },
+        "Skills":{
+            "召唤黑奴":{
+                "Type":"ActiveSkill",
+                "Effect":"SummonBlackSlaves",
+                "Cost":{
+                    "Gold":300,
+                    "Wood":8
+                }
+            }
+        },
+        "Description":"在市场边邻四格各召唤一个黑奴(若为空)(冷却1回合)"
+    }
+}
