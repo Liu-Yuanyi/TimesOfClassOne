@@ -10,7 +10,7 @@ class Trigger(Enum):
     # --- 属性计算类 (Modifiers) ---
     CALC_ATTACK = "CALC_ATTACK"                 # 计算攻击力时
     CALC_ATTACK_RANGE = "CALC_ATTACK_RANGE"     # 计算攻击范围时
-    CALC_ATTACK_TARGET = "CALC_ATTACK_TARGET"   # 计算可攻击目标时
+    CALC_ATTACK_POSITIONS = "CALC_ATTACK_POSITIONS"  # 计算可攻击位置时
     CALC_MOVE_RANGE = "CALC_MOVE_RANGE"         # 计算移动范围时
     CALC_DAMAGE = "CALC_DAMAGE"                 # 计算受到的伤害 (减伤, 护甲)
     CALC_COST = "CALC_COST"                     # 计算价格

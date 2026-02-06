@@ -121,40 +121,41 @@ class Unit(GameObject):
         self.hp : int = self._s.get("MaxHP", 1)  # 当前生命值
         # 行动状态管理
         self.action_state : ActionState = ActionState()
-        @property
-        def _p(self)->str:
-            return "Promoted" if self.promoted else "Normal"
-        @property
-        def _s(self)->Dict[str, Any]:
-            return self._data.get(self._p, {})
-        @property
-        def name(self) -> str:
-            return self._data.get("Name", "Unknown Name")
-        @property
-        def char(self) -> str:
-            return self._data.get("Char", "?")
-        @property
-        def attack(self) -> int:
-            return self._s.get("Attack", 0)
-        @property
-        def attack_range(self) -> Dict[str, Any]:
-            return self._s.get("AttackRange", {"Type": "+", "Min": 1, "Max": 1})
-        @property
-        def max_hp(self) -> int:
-            return self._s.get("MaxHP", 1)
-        @property
-        def move_range(self) -> Dict[str, Any]:
-            return self._s.get("MoveRange", {"Type": "*", "Min": 1, "Max": 1})
-        @property
-        def cost(self) -> Dict[str, Dict[str, int]]:
-            return self._data.get("Cost", {"Gold": 0, "Wood": 0})
-        @property
-        def attackable(self) -> bool: # 是否可以攻击
-            # self.attackble 和 self.action_state.Attackable 的区别为: 前者说的是这个实体本身具不具备攻击能力, 后者说的是这个实体本回合还能不能攻击
-            return self._s.get("Attackable", True)
-        @property
-        def movable(self) -> bool: # 是否可以移动
-            return self._s.get("Movable", True)
+
+    @property
+    def _p(self)->str:
+        return "Promoted" if self.promoted else "Normal"
+    @property
+    def _s(self)->Dict[str, Any]:
+        return self._data.get(self._p, {})
+    @property
+    def name(self) -> str:
+        return self._data.get("Name", "Unknown Name")
+    @property
+    def char(self) -> str:
+        return self._data.get("Char", "?")
+    @property
+    def attack(self) -> int:
+        return self._s.get("Attack", 0)
+    @property
+    def attack_range(self) -> Dict[str, Any]:
+        return self._s.get("AttackRange", {"Type": "+", "Min": 1, "Max": 1})
+    @property
+    def max_hp(self) -> int:
+        return self._s.get("MaxHP", 1)
+    @property
+    def move_range(self) -> Dict[str, Any]:
+        return self._s.get("MoveRange", {"Type": "*", "Min": 1, "Max": 1})
+    @property
+    def cost(self) -> Dict[str, Dict[str, int]]:
+        return self._data.get("Cost", {"Gold": 0, "Wood": 0})
+    @property
+    def attackable(self) -> bool: # 是否可以攻击
+        # self.attackble 和 self.action_state.Attackable 的区别为: 前者说的是这个实体本身具不具备攻击能力, 后者说的是这个实体本回合还能不能攻击
+        return self._s.get("Attackable", True)
+    @property
+    def movable(self) -> bool: # 是否可以移动
+        return self._s.get("Movable", True)
 
 class Building(GameObject):
     """建筑物"""
@@ -213,27 +214,28 @@ class Building(GameObject):
         self.hp = stats["MaxHP"]
         self.vertical : bool = vertical  # 建筑物朝向，false=水平，true=垂直
         self.action_state : ActionState = ActionState()
-        @property
-        def name(self) -> str:
-            return self.basic_stats.get("Name", "Unknown Building")
-        @property
-        def char(self) -> str:
-            return self.basic_stats.get("Char", "?")
-        @property
-        def size(self) -> Dict[str, int]:
-            return self.basic_stats.get("Size", {"Width": 1, "Height": 1})
-        @property
-        def attackable(self) -> bool:
-            return self.basic_stats.get("Attackable", False)
-        @property
-        def movable(self) -> bool:
-            return False  # 建筑物不可移动
-        @property
-        def attack(self) -> int:
-            return self.basic_stats.get("Attack", 0)
-        @property
-        def attack_range(self) -> Dict[str, Any]:
-            return self.basic_stats.get("AttackRange", {"Type": "+", "Min": 1, "Max": 1})
-        @property
-        def cost(self) -> Dict[str, Dict[str, int]]:
-            return self.basic_stats.get("Cost", {"Gold": 0, "Wood": 0})
+    
+    @property
+    def name(self) -> str:
+        return self.basic_stats.get("Name", "Unknown Building")
+    @property
+    def char(self) -> str:
+        return self.basic_stats.get("Char", "?")
+    @property
+    def size(self) -> Dict[str, int]:
+        return self.basic_stats.get("Size", {"Width": 1, "Height": 1})
+    @property
+    def attackable(self) -> bool:
+        return self.basic_stats.get("Attackable", False)
+    @property
+    def movable(self) -> bool:
+        return False  # 建筑物不可移动
+    @property
+    def attack(self) -> int:
+        return self.basic_stats.get("Attack", 0)
+    @property
+    def attack_range(self) -> Dict[str, Any]:
+        return self.basic_stats.get("AttackRange", {"Type": "+", "Min": 1, "Max": 1})
+    @property
+    def cost(self) -> Dict[str, Dict[str, int]]:
+        return self.basic_stats.get("Cost", {"Gold": 0, "Wood": 0})

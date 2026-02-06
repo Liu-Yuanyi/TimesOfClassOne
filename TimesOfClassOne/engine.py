@@ -256,7 +256,7 @@ class GameEngine:
                 if not ent.nowattackable:
                     print(f"Entity {ent.name} cannot attack this turn.")
                     continue
-                attackable_uids = self._calc_attackable_targets(ent)
+                attackable_uids = self._calc_attackable_positions(ent)
                 target_uid = response.get("target_entity_uid")
                 if target_uid not in attackable_uids:
                     print(f"Invalid attack target selected.")
@@ -393,18 +393,50 @@ class GameEngine:
 
     def _calc_attack(self, attacker: Unit) -> int:
         basic_attack = attacker.attack
+        ctx = Context(self, source=attacker, value=basic_attack)
+        self.event_bus.emit(Trigger.CALC_ATTACK, ctx)
+        return ctx.value
+    
     def _calc_move_range(self, unit: Unit) -> int:
-        pass
+        basic_move_range = unit.move_range
+        ctx = Context(self, source=unit, value=basic_move_range)
+        self.event_bus.emit(Trigger.CALC_MOVE_RANGE, ctx)
+        return ctx.value
+
     def _calc_attack_range(self, unit: Unit) -> Tuple[int, int]:
-        pass
+        basic_attack_range = unit.attack_range
+        ctx = Context(self, source=unit, value=basic_attack_range)
+        self.event_bus.emit(Trigger.CALC_ATTACK_RANGE, ctx)
+        return ctx.value
 
     ## -- 结合事件系统的计算 --
     
-    def _calc_attackable_targets(self, unit: Unit) -> List[int]:
-        pass
+    def _calc_attackable_positions(self, unit: Unit) -> List[Tuple[int, int]]:
+        """计算单位当前可攻击的位置"""
+        attack_range = self._calc_attack_range(unit)
+        attack_positions = self.game_map._calc_range_positions(unit, attack_range)
+        ret : List[Tuple[int, int]] = []
+        for p in attack_positions:
+            ent = self.game_map.get_entity_at(p[0], p[1])
+            if ent and ent.owner_id != unit.owner_id:
+                ret.append(p)
+        ctx = Context(self, source=unit, value=ret)
+        self.event_bus.emit(Trigger.CALC_ATTACK_POSITIONS, ctx)
+        return ctx.value
+        
     
     def _calc_movable_positions(self, unit: Unit) -> List[Tuple[int, int]]:
-        pass
+        move_range = self._calc_move_range(unit)
+        move_positions = self.game_map._calc_range_positions(unit, move_range, Flying="飞行" in unit.skills)
+
+        for p in move_positions:
+            ent = self.game_map.get_entity_at(p[0], p[1])
+            if ent:
+                move_positions.remove(p)
+
+        ctx = Context(self, source=unit, value=move_positions)
+        self.event_bus.emit(Trigger.CALC_MOVE_RANGE, ctx)
+        return ctx.value
 
     ## -- 战斗流程 --
 
