@@ -229,7 +229,7 @@ class GameEngine:
                 if not isinstance(ent, Unit):
                     print(f"Selected entity is not a unit and cannot move.")
                     continue
-                if not ent.action_state.Movable:
+                if not ent.nowmovable:
                     print(f"Entity {ent.name} cannot move this turn.")
                     continue
                 move_range= self._calc_movable_positions(ent)
@@ -253,7 +253,7 @@ class GameEngine:
                 if not isinstance(ent, Unit) or (isinstance(ent, Building) and not ent.attackable):
                     print(f"Selected entity cannot attack.")
                     continue
-                if not ent.action_state.Attackable:
+                if not ent.nowattackable:
                     print(f"Entity {ent.name} cannot attack this turn.")
                     continue
                 attackable_uids = self._calc_attackable_targets(ent)
@@ -324,10 +324,6 @@ class GameEngine:
                 print(f"Unknown action: {action}")
                 continue
 
-                
-
-
-
     # --- 核心交互机制 ---
 
     async def request_input(self, request: UIRequest) -> Dict[str, Any]:
@@ -366,28 +362,37 @@ class GameEngine:
         if self._current_request.request_id != request_id:
             print(f"[Engine] Warning: Request ID mismatch. Exp: {self._current_request.request_id}, Got: {request_id}")
             return
+        
+        log = GameActionLog(
+            turn=self.turn_count,
+            player_id=self._current_request.player_id,
+            request_type=self._current_request.type,
+            request_id=request_id,
+            response_data=data
+        )
+        self.action_history.append(log)
             
         if self._input_future and not self._input_future.done():
             self._input_future.set_result(data)
 
     # --- 辅助逻辑/战斗计算 ---
 
-    ## -- 辅助函数 --
-
-    def _calc_range_positions(self, unit: Unit, range: Dict[str, Any], Flying: bool = False) -> List[Tuple[int, int]]:
-        """获取单位基于指定范围类型的所有格子坐标"""
-        """range 示例:
-        {
-            "Type": "*",   # 范围类型: 十字(+), 王步(*), 直线(-), 斜线(x), 马步(h)
-            "Min": 1,      # 最小范围
-            "Max": 3       # 最大范围
-        }"""
-        pass
+    # ## -- 辅助函数 --
+    """这个函数应该交给GameMap来处理, 因为它需要考虑地形和路径寻找等复杂逻辑, 直接放在引擎里不太合适"""
+    # def _calc_range_positions(self, unit: Unit, range: Dict[str, Any], Flying: bool = False) -> List[Tuple[int, int]]:
+    #     """获取单位基于指定范围类型的所有格子坐标"""
+    #     """range 示例:
+    #     {
+    #         "Type": "*",   # 范围类型: 十字(+), 王步(*), 直线(-), 斜线(x), 马步(h)
+    #         "Min": 1,      # 最小范围
+    #         "Max": 3       # 最大范围
+    #     }"""
+    #     pass
 
     ## -- 面板属性 --
 
     def _calc_attack(self, attacker: Unit) -> int:
-        pass
+        basic_attack = attacker.attack
     def _calc_move_range(self, unit: Unit) -> int:
         pass
     def _calc_attack_range(self, unit: Unit) -> Tuple[int, int]:

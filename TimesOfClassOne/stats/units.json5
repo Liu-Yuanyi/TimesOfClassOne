@@ -334,7 +334,17 @@
         "Description": "恼怒：改为攻击周围8格（不分敌我）",
         "Skills": {
             "环击":{
-                "Type": "Static"
+                "Type": "PassiveSkill",
+                "Trigger": "ON_ATTACK",
+                "Effect": "RingAttack",
+                "Role": "SOURCE"
+            }
+        },
+        "Variables":{
+            "正在环击":{
+                "Type":"Turn",
+                "DefaultValue":0,
+                "Value":0
             }
         }
     },
@@ -591,8 +601,11 @@
         },
         "Description": "穿透：改为同时攻击目标与目标身后的单位（不分敌我）",
         "Skills": {
-            "龙息" :{
-                "Type":"Static"
+            "穿透" :{
+                "Type":"PassiveSkill",
+                "Trigger":"ON_ATTACK",
+                "Effect":"Pierce",
+                "Role":"SOURCE",
             }
         }
     },

@@ -25,10 +25,43 @@ class GameObject:
     @property
     def pos(self):
         return (self.x, self.y)
-    
-    @property # 虚函数接口: 可被操作的
-    def operable(self) -> bool:
-        pass
+    @pos.setter
+    def pos(self, value):
+        self.x, self.y = value
+    @property
+    def movable(self) -> bool:
+        raise NotImplementedError
+    @property
+    def attackable(self) -> bool:
+        raise NotImplementedError
+    @property
+    def nowoperable(self) -> bool:
+        """当前是否还能进行操作 (移动/攻击/使用技能)"""
+        if self.action_state.Attackable and self.attackable:
+            return True
+        if self.action_state.Movable and self.movable:
+            return True
+        for skill_name, skill_info in self.skills.items():
+            if skill_info.get("Type") == "ActiveSkill":
+                if self.vars.get(skill_name, {}).get("Value", 0) > 0:
+                    return True
+        return False
+    @property
+    def nowmovable(self) -> bool:
+        """当前是否还能移动"""
+        return self.action_state.Movable and self.movable
+    @property
+    def nowattackable(self) -> bool:
+        """当前是否还能攻击"""
+        return self.action_state.Attackable and self.attackable
+    @property
+    def nowskillable(self) -> bool:
+        """当前是否还能使用技能"""
+        for skill_name, skill_info in self.skills.items():
+            if skill_info.get("Type") == "ActiveSkill":
+                if self.vars.get(skill_name, {}).get("Value", 0) > 0:
+                    return True
+        return False
 
 class Unit(GameObject):
     """兵种单位"""
@@ -116,18 +149,12 @@ class Unit(GameObject):
         def cost(self) -> Dict[str, Dict[str, int]]:
             return self._data.get("Cost", {"Gold": 0, "Wood": 0})
         @property
-        def operable(self) -> bool:
-            if self.action_state.Movable or self.action_state.Attackable:
-                return True
-            for skill_name, skill_info in self.skills.items():
-                if skill_info.get("Type") == "ActiveSkill":
-                    if self.vars.get(skill_name, {}).get("Value", 0) > 0:
-                        return True
-            return False
-        @property
         def attackable(self) -> bool: # 是否可以攻击
             # self.attackble 和 self.action_state.Attackable 的区别为: 前者说的是这个实体本身具不具备攻击能力, 后者说的是这个实体本回合还能不能攻击
             return self._s.get("Attackable", True)
+        @property
+        def movable(self) -> bool: # 是否可以移动
+            return self._s.get("Movable", True)
 
 class Building(GameObject):
     """建筑物"""
@@ -199,6 +226,9 @@ class Building(GameObject):
         def attackable(self) -> bool:
             return self.basic_stats.get("Attackable", False)
         @property
+        def movable(self) -> bool:
+            return False  # 建筑物不可移动
+        @property
         def attack(self) -> int:
             return self.basic_stats.get("Attack", 0)
         @property
@@ -207,13 +237,3 @@ class Building(GameObject):
         @property
         def cost(self) -> Dict[str, Dict[str, int]]:
             return self.basic_stats.get("Cost", {"Gold": 0, "Wood": 0})
-        @property
-        def operable(self) -> bool:
-            if self.action_state["Attackable"] and self.attackable:
-                return True
-            for skill_name, skill_info in self.skills.items():
-                if skill_info.get("Type") == "ActiveSkill":
-                    if self.vars.get(skill_name, {}).get("Value", 0) > 0:
-                        return True
-            return False
-            
