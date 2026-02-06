@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from typing import List, Dict, Any, Callable
+from inspect import iscoroutinefunction
 
 class Trigger(Enum):
     """
@@ -18,6 +19,7 @@ class Trigger(Enum):
     # --- 流程事件类 (Flow Events) ---
     ON_GAME_START = "ON_GAME_START"      # 游戏开始
     ON_TURN_START = "ON_TURN_START"      # 回合开始
+    ON_INPUT_REQUEST = "ON_INPUT_REQUEST" # 请求输入时
     ON_TURN_END = "ON_TURN_END"        # 回合结束
     
     # --- 动作前后钩子 (Action Hooks) ---
@@ -49,7 +51,7 @@ class Context:
         self.source = source  # 触发事件的主体 (Attacker)
         self.target = target  # 事件的目标 (Defender/Target Pos)
         self.value = value    # 传递的数值 (如伤害值, 治疗量, 属性值)
-        self.data = kwargs    # 额外的元数据 (如 'skill_id', 'hit_pos')
+        self.data = kwargs    # 额外的元数据 (如 'skill_name', 'hit_pos')
         self.is_stopped = False
 
 
@@ -73,9 +75,26 @@ class EventBus:
         
     def emit(self, trigger: Trigger, context: Context) -> Context:
         """
-        触发事件。
-        会依次调用所有订阅者。
+        触发同步事件 (用于数值计算, 不能包含 await)。
         """
         for handler, _ in self._listeners[trigger]:
+            if iscoroutinefunction(handler):
+                raise RuntimeError("Cannot call async handler in sync emit")
             handler(context)
+            if context.is_stopped:
+                break
+        return context
+
+    async def async_emit(self, trigger: Trigger, context: Context) -> Context:
+        """
+        触发异步事件 (用于游戏流程, 支持等待 UI 输入)。
+        """
+        for handler, _ in self._listeners[trigger]:
+            if iscoroutinefunction(handler):
+                await handler(context)
+            else:
+                handler(context)
+            
+            if context.is_stopped:
+                break
         return context

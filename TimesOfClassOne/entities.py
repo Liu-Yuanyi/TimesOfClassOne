@@ -4,9 +4,9 @@ from typing import List, Dict, Any, Optional
 @dataclass
 class ActionState:
     """单位或建筑的行动状态"""
-    Movable: bool = True             # 本回合是否还能移动
-    Attackable: bool = True          # 本回合是否还能攻击
-    MovingPoints: int = 1              # 剩余移动点数
+    Movable: bool = False             # 本回合是否还能移动
+    Attackable: bool = False          # 本回合是否还能攻击
+    MovingPoints: int = 0              # 剩余移动点数
 
 @dataclass
 class GameObject:
@@ -16,6 +16,8 @@ class GameObject:
     hp : int = 0 # 当前生命值
     x: int = 0 # 地图上的X坐标
     y: int = 0 # 地图上的Y坐标
+    prev_x: int = 0 # 回合开始时的X坐标
+    prev_y: int = 0 # 回合开始时的Y坐标
     skills: Dict[str, Any] = field(default_factory = dict) # 技能实例
     buffs: Dict[str, Any] = field(default_factory = dict) # 临时属性增益/减益
     vars: Dict[str, Any] = field(default_factory = dict)  # 临时变量存储
@@ -117,11 +119,15 @@ class Unit(GameObject):
         def operable(self) -> bool:
             if self.action_state.Movable or self.action_state.Attackable:
                 return True
-            for skill_id, skill_info in self.skills.items():
+            for skill_name, skill_info in self.skills.items():
                 if skill_info.get("Type") == "ActiveSkill":
-                    if self.vars.get(skill_id, {}).get("Value", 0) > 0:
+                    if self.vars.get(skill_name, {}).get("Value", 0) > 0:
                         return True
             return False
+        @property
+        def attackable(self) -> bool: # 是否可以攻击
+            # self.attackble 和 self.action_state.Attackable 的区别为: 前者说的是这个实体本身具不具备攻击能力, 后者说的是这个实体本回合还能不能攻击
+            return self._s.get("Attackable", True)
 
 class Building(GameObject):
     """建筑物"""
@@ -205,9 +211,9 @@ class Building(GameObject):
         def operable(self) -> bool:
             if self.action_state["Attackable"] and self.attackable:
                 return True
-            for skill_id, skill_info in self.skills.items():
+            for skill_name, skill_info in self.skills.items():
                 if skill_info.get("Type") == "ActiveSkill":
-                    if self.vars.get(skill_id, {}).get("Value", 0) > 0:
+                    if self.vars.get(skill_name, {}).get("Value", 0) > 0:
                         return True
             return False
             
