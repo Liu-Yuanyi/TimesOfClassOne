@@ -29,9 +29,9 @@ class Trigger(Enum):
     BEFORE_MOVE = "BEFORE_MOVE"        # 移动指令执行前
     ON_MOVE = "ON_MOVE"            # 移动完成后
     
-    BEFORE_ATTACK = "BEFORE_ATTACK"      # 攻击前 (如: 检查是否可以攻击)
-    ON_ATTACK = "ON_ATTACK"          # 攻击结算后 (如: 溅射, 位移)
-    ON_DAMAGE_TAKEN = "ON_DAMAGE_TAKEN"    # 受到伤害时 (如: 反伤)
+    BEFORE_ATTACK = "BEFORE_ATTACK"     # 攻击前
+    ON_ATTACK = "ON_ATTACK"             # 攻击后(但死亡前) 
+    AFTER_ATTACK = "AFTER_ATTACK"       # 攻击完全结束后(死亡后) 
     
     ON_KILL = "ON_KILL"            # 击杀实体时 (如: 连击, 晋升)
     ON_DEATH = "ON_DEATH"           # 实体死亡时 (如: 亡语)
@@ -46,11 +46,12 @@ class Context:
     在事件传播过程中携带所有必要的数据，可以在Handler通过修改该对象
     来影响后续的计算结果 (如修改 value 值)。
     """
-    def __init__(self, engine, source=None, target=None, value=0, **kwargs):
+    def __init__(self, engine, source=None, target=None, value=0, position=None, **kwargs):
         self.engine = engine  # 这里的 engine 就是 Engine 实例
         self.source = source  # 触发事件的主体 (Attacker)
         self.target = target  # 事件的目标 (Defender/Target Pos)
         self.value = value    # 传递的数值 (如伤害值, 治疗量, 属性值)
+        self.position = position  # 相关位置 (如攻击位置, 移动目标位置)
         self.data = kwargs    # 额外的元数据 (如 'skill_name', 'hit_pos')
         self.is_stopped = False
 

@@ -3,8 +3,9 @@ from typing import List, Dict, Any, Optional, Tuple, Callable
 import asyncio
 from dataclasses import dataclass, field
 from json5 import load as json5_load
+from functools import partial
 
-from .event import EventBus, Trigger, Context
+from .event import EventBus, Trigger, Context, TriggerListForSkill
 from .entities import Unit, Building, GameObject
 from .modes import baseMode 
 from .loader import loader
@@ -93,6 +94,15 @@ class GameEngine:
         # 初始化系统
         self._init_systems()
 
+        # 动作分发(Dispatcher)
+        self._action_handlers = {
+            "entity_move": self._handle_action_move,
+            "entity_attack": self._handle_action_attack,
+            "entity_use_skill": self._handle_action_use_skill,
+            "spell_cast": self._handle_action_spell_cast,
+            "tear_down": self._handle_action_tear_down,
+        }
+
     def _init_map_entities(self):
         """从./map.json读取初始实体"""
         """map_stats 示例:
@@ -132,8 +142,15 @@ class GameEngine:
     def _init_systems(self):
         """初始化技能管理器、规则系统等"""
         self.skill_manager = SkillManager(self)
-
-
+        eb = self.event_bus
+        sm = self.skill_manager
+        """需要注册skillmanager的trigger: 其中CALC开头的注册普通的skill_trigger, 其余的的注册协程版本的async_skill_trigger"""
+        
+        """相较于所有Trigger, 这里缺失了ON_GAME_START, 不需要补上"""
+        for trigger_name in TriggerListForSkill["sync"]:
+            eb.register(Trigger(trigger_name), partial(sm.skill_trigger, trigger=Trigger(trigger_name)))
+        for trigger_name in TriggerListForSkill["async"]:
+            eb.register(Trigger(trigger_name), partial(sm.async_skill_trigger, trigger=Trigger(trigger_name)))
 
     # --- 数据接口 ---
 
@@ -215,114 +232,118 @@ class GameEngine:
             # 3. 处理主流程指令
             action = response.get("action")
             
-            # TODO: 添加处理操作的逻辑
-
             if action == "end_turn":
                 turn_active = False
                 print(f"{current_player.name} ends their turn.")
-                
-            elif action == "entity_move":
-                ent = self.get_object(response.get("entity_uid"))
-                if not ent or ent.owner_id != current_player.player_id:
-                    print(f"Invalid entity selected for move.")
-                    continue
-                if not isinstance(ent, Unit):
-                    print(f"Selected entity is not a unit and cannot move.")
-                    continue
-                if not ent.nowmovable:
-                    print(f"Entity {ent.name} cannot move this turn.")
-                    continue
-                move_range= self._calc_movable_positions(ent)
-                target_pos = response.get("target_position")
-                if target_pos not in move_range:
-                    print(f"Invalid move position selected.")
-                    continue
-                # 执行移动
-                self.game_map.move_entity(ent, target_pos[0], target_pos[1])
-                ent.action_state.Movable = False
-                print(f"{ent.name} moved to {target_pos}.")
-
-                if "狙击" in ent.skills:
-                    ent.action_state.Attackable = False
-
-            elif action == "entity_attack":
-                ent = self.get_object(response.get("entity_uid"))
-                if not ent or ent.owner_id != current_player.player_id:
-                    print(f"Invalid entity selected for attack.")
-                    continue
-                if not isinstance(ent, Unit) or (isinstance(ent, Building) and not ent.attackable):
-                    print(f"Selected entity cannot attack.")
-                    continue
-                if not ent.nowattackable:
-                    print(f"Entity {ent.name} cannot attack this turn.")
-                    continue
-                attackable_uids = self._calc_attackable_positions(ent)
-                target_uid = response.get("target_entity_uid")
-                if target_uid not in attackable_uids:
-                    print(f"Invalid attack target selected.")
-                    continue
-                target_ent = self.get_object(target_uid)
-                if not target_ent:
-                    print(f"Target entity does not exist.")
-                    continue
-                # 执行攻击
-                await self._execute_attack(ent, target_ent)
-                ent.action_state.Attackable = False
-                if "攻击后可移动" not in ent.skills:  
-                    ent.action_state.Movable = False
-
-            elif action == "entity_use_skill":
-
-                # 读取信息并判断合法性
-                ent = self.get_object(response.get("entity_uid"))
-                if not ent or ent.owner_id != current_player.player_id:
-                    print(f"Invalid entity selected for skill.")
-                    continue
-                skill_name = response.get("skill_name")
-                skill_info = ent.skills.get(skill_name)
-                if not skill_info or skill_info.get("Type") != "ActiveSkill":
-                    print(f"Invalid skill selected.")
-                    continue
-                if ent.vars.get(skill_name, {}).get("Value", 0) <= 0:
-                    print(f"No casts left for this skill.")
-                    continue
-                if skill_info.get("AttackConflict", False) and not ent.action_state.Attackable:
-                    print(f"Skill {skill_name} cannot be used after attacking.")
-                    continue
-                if skill_info.get("MoveConflict", False) and not ent.action_state.Movable:
-                    print(f"Skill {skill_name} cannot be used after moving.")
-                    continue
-
-                ent.vars[skill_name]["Value"] -= 1
-                await self.loader.funcdict[skill_info["Effect"]](self, ent, skill_name, response.get("skill_target"))
-                # 这里直接调用技能函数, 技能函数内部负责触发事件和处理
-
-            elif action == "spell_cast":
-                spell_index = response.get("spell_index")
-                if current_player.spells_casts_left.get(spell_index, 0) <= 0:
-                    print(f"No casts left for this spell.")
-                    continue
-                current_player.spells_casts_left[spell_index] -= 1
-                spell_info = self.loader.mode_stats[self.mode.name]["Spells"][spell_index]
-                await self.loader.funcdict[spell_info["Effect"]](self, current_player, spell_index, response.get("spell_target"))
-                # 这里直接调用技能函数, 技能函数内部负责触发事件和处理
-
-            elif action == "tear_down":
-                ent = self.get_object(response.get("entity_uid"))
-                if not ent or ent.owner_id != current_player.player_id:
-                    print(f"Invalid entity selected for tear down.")
-                    continue
-                if not isinstance(ent, Building):
-                    print(f"Selected entity is not a building.")
-                    continue
-                # 执行拆除
-                self.game_map.remove_entity(ent)
-                del self.entities[ent.uid]
-                print(f"{ent.name} has been torn down.")
-
             else:
-                print(f"Unknown action: {action}")
-                continue
+                handler = self._action_handlers.get(action)
+                if handler:
+                    await handler(current_player, response)
+                else:
+                    print(f"Unknown action: {action}")
+
+    # --- 动作处理 (Action Handlers) ---
+
+    async def _handle_action_move(self, current_player: PlayerState, response: dict):
+        ent = self.get_object(response.get("entity_uid"))
+        if not ent or ent.owner_id != current_player.player_id:
+            print(f"Invalid entity selected for move.")
+            return
+        if not isinstance(ent, Unit):
+            print(f"Selected entity is not a unit and cannot move.")
+            return
+        if not ent.nowmovable:
+            print(f"Entity {ent.name} cannot move this turn.")
+            return
+        move_range= self._calc_movable_positions(ent)
+        target_pos = tuple(response.get("target_position")) if response.get("target_position") else None
+        if not target_pos or target_pos not in move_range:
+            print(f"Invalid move position selected.")
+            return
+        # 执行移动
+        self.event_bus.emit(Trigger.BEFORE_MOVE, Context(self, source=ent, position=target_pos))
+        self.game_map.move_entity(ent, target_pos[0], target_pos[1])
+        ent.action_state.Movable = False
+        print(f"{ent.name} moved to {target_pos}.")
+        self.event_bus.emit(Trigger.ON_MOVE, Context(self, source=ent, position=target_pos))
+
+    async def _handle_action_attack(self, current_player: PlayerState, response: dict):
+        ent = self.get_object(response.get("entity_uid"))
+        if not ent or ent.owner_id != current_player.player_id:
+            print(f"Invalid entity selected for attack.")
+            return
+        if not isinstance(ent, Unit) or (isinstance(ent, Building) and not ent.attackable):
+            print(f"Selected entity cannot attack.")
+            return
+        if not ent.nowattackable:
+            print(f"Entity {ent.name} cannot attack this turn.")
+            return
+        attackable_positions = self._calc_attackable_positions(ent)
+        target_uid = response.get("target_entity_uid")
+        target_pos = response.get("target_position")
+        target_ent = self.get_object(target_uid)
+        if not target_ent:
+            print(f"Target entity does not exist.")
+            return
+        
+        if target_pos not in attackable_positions:
+            print(f"Invalid attack position selected.")
+            return
+        if target_ent.uid != self.game_map.get_entity_at(target_pos[0], target_pos[1]).uid:
+            print(f"Target entity does not match the entity at the selected position.")
+            return
+        
+        # 执行攻击
+        self.event_bus.emit(Trigger.BEFORE_ATTACK, Context(self, source=ent, target=target_ent, position=target_pos))
+        await self._execute_attack(ent, target_ent, self._calc_attack(ent), target_pos)
+        ent.action_state.Attackable = False
+        self.event_bus.emit(Trigger.AFTER_ATTACK, Context(self, source=ent, target=target_ent, position=target_pos))
+
+    async def _handle_action_use_skill(self, current_player: PlayerState, response: dict):
+        # 读取信息并判断合法性
+        ent = self.get_object(response.get("entity_uid"))
+        if not ent or ent.owner_id != current_player.player_id:
+            print(f"Invalid entity selected for skill.")
+            return
+        skill_name = response.get("skill_name")
+        skill_info = ent.skills.get(skill_name)
+        if not skill_info or skill_info.get("Type") != "ActiveSkill":
+            print(f"Invalid skill selected.")
+            return
+        if ent.vars.get(skill_name, {}).get("Value", 0) <= 0:
+            print(f"No casts left for this skill.")
+            return
+        if skill_info.get("AttackConflict", False) and not ent.action_state.Attackable:
+            print(f"Skill {skill_name} cannot be used after attacking.")
+            return
+        if skill_info.get("MoveConflict", False) and not ent.action_state.Movable:
+            print(f"Skill {skill_name} cannot be used after moving.")
+            return
+
+        ent.vars[skill_name]["Value"] -= 1
+        await self.loader.funcdict[skill_info["Effect"]](self, ent, skill_name, response.get("skill_target"))
+
+    async def _handle_action_spell_cast(self, current_player: PlayerState, response: dict):
+        spell_index = response.get("spell_index")
+        if current_player.spells_casts_left.get(spell_index, 0) <= 0:
+            print(f"No casts left for this spell.")
+            return
+        current_player.spells_casts_left[spell_index] -= 1
+        spell_info = self.loader.mode_stats[self.mode.name]["Spells"][spell_index]
+        await self.loader.funcdict[spell_info["Effect"]](self, current_player, spell_index, response.get("spell_target"))
+
+    async def _handle_action_tear_down(self, current_player: PlayerState, response: dict):
+        ent = self.get_object(response.get("entity_uid"))
+        if not ent or ent.owner_id != current_player.player_id:
+            print(f"Invalid entity selected for tear down.")
+            return
+        if not isinstance(ent, Building):
+            print(f"Selected entity is not a building.")
+            return
+        # 执行拆除
+        self.game_map.remove_entity(ent)
+        del self.entities[ent.uid]
+        print(f"{ent.name} has been torn down.")
 
     # --- 核心交互机制 ---
 
@@ -377,18 +398,6 @@ class GameEngine:
 
     # --- 辅助逻辑/战斗计算 ---
 
-    # ## -- 辅助函数 --
-    """这个函数应该交给GameMap来处理, 因为它需要考虑地形和路径寻找等复杂逻辑, 直接放在引擎里不太合适"""
-    # def _calc_range_positions(self, unit: Unit, range: Dict[str, Any], Flying: bool = False) -> List[Tuple[int, int]]:
-    #     """获取单位基于指定范围类型的所有格子坐标"""
-    #     """range 示例:
-    #     {
-    #         "Type": "*",   # 范围类型: 十字(+), 王步(*), 直线(-), 斜线(x), 马步(h)
-    #         "Min": 1,      # 最小范围
-    #         "Max": 3       # 最大范围
-    #     }"""
-    #     pass
-
     ## -- 面板属性 --
 
     def _calc_attack(self, attacker: Unit) -> int:
@@ -414,7 +423,7 @@ class GameEngine:
     def _calc_attackable_positions(self, unit: Unit) -> List[Tuple[int, int]]:
         """计算单位当前可攻击的位置"""
         attack_range = self._calc_attack_range(unit)
-        attack_positions = self.game_map._calc_range_positions(unit, attack_range)
+        attack_positions = self.game_map.calc_range_entity_positions(unit, attack_range)
         ret : List[Tuple[int, int]] = []
         for p in attack_positions:
             ent = self.game_map.get_entity_at(p[0], p[1])
@@ -427,7 +436,7 @@ class GameEngine:
     
     def _calc_movable_positions(self, unit: Unit) -> List[Tuple[int, int]]:
         move_range = self._calc_move_range(unit)
-        move_positions = self.game_map._calc_range_positions(unit, move_range, Flying="飞行" in unit.skills)
+        move_positions = self.game_map.calc_range_empty_positions(unit, move_range, ignore_obstacles= "飞行" in unit.skills)
 
         for p in move_positions:
             ent = self.game_map.get_entity_at(p[0], p[1])
@@ -440,16 +449,16 @@ class GameEngine:
 
     ## -- 战斗流程 --
 
-    async def _execute_attack(self, attacker: Unit, defender: GameObject):
+    async def _execute_attack(self, attacker: Unit, defender: GameObject, attack: int, position: Tuple[int, int]):
         """执行攻击逻辑 (包含 EventBus 触发)"""
         # 1. 触发攻击前 (Before Attack) - 可能被技能打断
-        ctx = Context(self, source=attacker, target=defender)
+        ctx = Context(self, source=attacker, target=defender, position=position)
         await self.event_bus.async_emit(Trigger.BEFORE_ATTACK, ctx)
         if ctx.is_stopped:
             return
 
         # 2. 计算伤害 (Calc Damage)
-        dmg_ctx = Context(self, source=attacker, target=defender, value=self._calc_attack(attacker))
+        dmg_ctx = Context(self, source=attacker, target=defender, value=attack, position=position)
         self.event_bus.emit(Trigger.CALC_DAMAGE, dmg_ctx)
         final_damage = dmg_ctx.value
         
@@ -458,21 +467,33 @@ class GameEngine:
         print(f"{attacker.name} attacks {defender.name} for {final_damage} damage!")
         
         # 4. 触发攻击后 (溅射、反伤等)
-        post_ctx = Context(self, source=attacker, target=defender, value=final_damage)
-        await self.event_bus.async_emit(Trigger.ON_ATTACK, post_ctx)
+        # post_ctx = Context(self, source=attacker, target=defender, value=final_damage, position=position)
+        # await self.event_bus.async_emit(Trigger.ON_ATTACK, post_ctx)
 
-        # 5. 触发受伤事件
-        damage_ctx = Context(self, source=attacker, target=defender, value=final_damage)
-        await self.event_bus.async_emit(Trigger.ON_DAMAGE_TAKEN, damage_ctx)
+        # 5. 触发攻击事件
+        damage_ctx = Context(self, source=attacker, target=defender, value=final_damage, position=position)
+        await self.event_bus.async_emit(Trigger.ON_ATTACK, damage_ctx)
         
         # 6. 死亡判定
         if defender.hp <= 0:
             print(f"{defender.name} has been killed!")
-            await self.event_bus.async_emit(Trigger.ON_DEATH, Context(self, source=defender, target=attacker, value=final_damage))
-            await self.event_bus.async_emit(Trigger.ON_KILL, Context(self, source=attacker, target=defender, value=final_damage))
+            await self.event_bus.async_emit(Trigger.ON_DEATH, Context(self, source=defender, target=attacker, value=final_damage, position=position))
+            await self.event_bus.async_emit(Trigger.ON_KILL, Context(self, source=attacker, target=defender, value=final_damage, position=position))
             # 7. 确认是否死亡
             if defender.hp <= 0:
                 # 从地图和实体列表中移除
+                self.game_map.remove_entity(defender)
+                del self.entities[defender.uid]
+
+    async def _execute_real_damage(self, attacker: GameObject, defender: GameObject, damage: int, position: Tuple[int, int]):
+        defender.hp -= damage
+        print(f"{attacker.name} deals {damage} real damage to {defender.name}!")
+
+        if defender.hp <= 0:
+            print(f"{defender.name} has been killed by real damage!")
+            await self.event_bus.async_emit(Trigger.ON_DEATH, Context(self, source=defender, target=attacker, value=damage, position=position))
+            # 确认是否死亡
+            if defender.hp <= 0:
                 self.game_map.remove_entity(defender)
                 del self.entities[defender.uid]
 
@@ -503,3 +524,6 @@ class GameEngine:
         await self.event_bus.async_emit(Trigger.ON_SPAWN, Context(self, source=building))
         
         return building
+    
+    ## -- 其他操作 --
+    # 治疗, 晋升,

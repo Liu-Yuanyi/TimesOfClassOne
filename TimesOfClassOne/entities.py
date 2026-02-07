@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
 @dataclass
@@ -8,19 +8,27 @@ class ActionState:
     Attackable: bool = False          # 本回合是否还能攻击
     MovingPoints: int = 0              # 剩余移动点数
 
-@dataclass
 class GameObject:
     """所有游戏实体的基类"""
-    uid: int # 每个实例的唯一ID
-    owner_id: int # 0=Neutral, 1=Player1, 2=Player2...
-    hp : int = 0 # 当前生命值
-    x: int = 0 # 地图上的X坐标
-    y: int = 0 # 地图上的Y坐标
-    prev_x: int = 0 # 回合开始时的X坐标
-    prev_y: int = 0 # 回合开始时的Y坐标
-    skills: Dict[str, Any] = field(default_factory = dict) # 技能实例
-    buffs: Dict[str, Any] = field(default_factory = dict) # 临时属性增益/减益
-    vars: Dict[str, Any] = field(default_factory = dict)  # 临时变量存储
+    # 预留接口供自动补全，具体实现由子类负责
+    name: str
+    movable: bool
+    attackable: bool
+    size: Dict[str, int]
+    vertical: bool
+    action_state: ActionState
+
+    def __init__(self, uid: int, owner_id: int):
+        self.uid = uid
+        self.owner_id = owner_id
+        self.hp: int = 0
+        self.x: int = 0
+        self.y: int = 0
+        self.prev_x: int = 0
+        self.prev_y: int = 0
+        self.skills: Dict[str, Any] = {} # 技能实例
+        self.buffs: Dict[str, Any] = {} # 临时属性增益/减益
+        self.vars: Dict[str, Any] = {}  # 临时变量存储
 
     @property
     def pos(self):
@@ -28,12 +36,7 @@ class GameObject:
     @pos.setter
     def pos(self, value):
         self.x, self.y = value
-    @property
-    def movable(self) -> bool:
-        raise NotImplementedError
-    @property
-    def attackable(self) -> bool:
-        raise NotImplementedError
+
     @property
     def nowoperable(self) -> bool:
         """当前是否还能进行操作 (移动/攻击/使用技能)"""
@@ -61,7 +64,9 @@ class GameObject:
             if skill_info.get("Type") == "ActiveSkill":
                 if self.vars.get(skill_name, {}).get("Value", 0) > 0:
                     return True
-        return False
+    # name @property removed as requested
+
+        raise NotImplementedError
 
 class Unit(GameObject):
     """兵种单位"""
@@ -121,6 +126,9 @@ class Unit(GameObject):
         self.hp : int = self._s.get("MaxHP", 1)  # 当前生命值
         # 行动状态管理
         self.action_state : ActionState = ActionState()
+
+        self.vertical : bool = False  # 兵种没有朝向，但为了统一接口，预留这个属性
+        self.size = {"Width": 1, "Height": 1}  # 兵种默认大小为1x1
 
     @property
     def _p(self)->str:

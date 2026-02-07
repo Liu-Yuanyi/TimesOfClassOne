@@ -290,7 +290,7 @@
         "Skills": {
             "吸引": {
                 "Type": "PassiveSkill",
-                "Trigger": "ON_ATTACK",
+                "Trigger": "AFTER_ATTACK",
                 "Effect": "Kawaii",
                 "Role": "SOURCE"
             }
@@ -647,7 +647,10 @@
         "Description": "狙击：移动后不能攻击",
         "Skills": {
             "狙击":{
-                "Type":"Static"
+                "Type":"PassiveSkill",
+                "Trigger":"ON_MOVE",
+                "Effect":"Snipe",
+                "Role":"SOURCE"
             }
         }
     },
