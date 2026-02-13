@@ -5,12 +5,12 @@ from dataclasses import dataclass, field
 from json5 import load as json5_load
 from functools import partial
 
-from .event import EventBus, Trigger, Context, TriggerListForSkill
-from .entities import Unit, Building, GameObject
-from .modes import baseMode 
-from .loader import loader
-from .maps import GameMap 
-from .skillmanager import SkillManager
+from event import EventBus, Trigger, Context, TriggerListForSkill
+from entities import Unit, Building, GameObject
+from modes import baseMode, GameOver
+from loader import loader
+from maps import GameMap 
+from skillmanager import SkillManager
 
 # --- UI 交互协议定义 ---
 
@@ -61,6 +61,7 @@ class GameEngine:
         # 核心组件
         self.event_bus = event_bus if event_bus is not None else EventBus()
         self.mode = mode
+        self.map_name = map_name
         self.game_map: GameMap # 假设有一个 GameMap 类 , 负责记录地图以及将地图坐标与实体的坐标维护同步
         
         # 游戏状态数据
@@ -120,8 +121,10 @@ class GameEngine:
                 {"Type": "Building", "Name": "总矿", "uid": 301, "owner_id":0, "x":17, "y":3}
             ],
         }"""
-        map_stats = self.loader.map_stats.get("default_map", {})
-        self.game_map = GameMap(map_stats.get("width",20), map_stats.get("height",20))
+        map_stats = self.loader.map_stats.get(self.map_name)
+        if not map_stats:
+            raise ValueError(f"Map stats not found for: {self.map_name}")
+        self.game_map = GameMap(map_stats)
         for ent in map_stats.get("entities", []):
             # 这里不调用 spawn_unit, 因为不触发事件
             if ent["Type"] == "Unit":
@@ -148,9 +151,13 @@ class GameEngine:
         
         """相较于所有Trigger, 这里缺失了ON_GAME_START, 不需要补上"""
         for trigger_name in TriggerListForSkill["sync"]:
-            eb.register(Trigger(trigger_name), partial(sm.skill_trigger, trigger=Trigger(trigger_name)))
+            eb.subscribe(Trigger(trigger_name), partial(sm.skill_trigger, trigger=Trigger(trigger_name)))
         for trigger_name in TriggerListForSkill["async"]:
-            eb.register(Trigger(trigger_name), partial(sm.async_skill_trigger, trigger=Trigger(trigger_name)))
+            eb.subscribe(Trigger(trigger_name), partial(sm.async_skill_trigger, trigger=Trigger(trigger_name)))
+
+        # 初始化模式 (绑定胜利条件监听)
+        if self.mode:
+            self.mode.initialize(self)
 
     # --- 数据接口 ---
 
@@ -174,12 +181,50 @@ class GameEngine:
         self.turn_count = 1
         self.current_player_id = 1
         
-        # 触发游戏开始事件
-        await self.event_bus.async_emit(Trigger.ON_GAME_START, Context(self))
+        try:
+            # 触发游戏开始事件
+            await self.event_bus.async_emit(Trigger.ON_GAME_START, Context(self))
+            
+            while self._running:
+                await self.run_turn()
+                self._switch_turn()
+                
+        except GameOver as e:
+            self._running = False
+            print(f"!!! GAME OVER !!! {e}")
+            # 1. 发送正常的结束事件通知 UI (不抛出异常)
+            # data 中携带 winner_id 和 explanation
+            await self.event_bus.async_emit(Trigger.ON_GAME_OVER, Context(self, data={"winner": e.winner_id, "reason": e.reason}))
+            
+        except asyncio.CancelledError:
+            print("Game Engine Cancelled.")
+            raise
+            
+        except Exception as e:
+            print(f"Unexpected Error in Game Loop: {e}")
+            import traceback
+            traceback.print_exc()
+            raise e
+            
+        finally:
+            # 无论是因为赢了、报错了还是被手动取消了，都要清理
+            await self._shutdown()
+
+    async def _shutdown(self):
+        """清理所有挂起任务和资源"""
+        self._running = False
         
-        while self._running:
-            await self.run_turn()
-            self._switch_turn()
+        # 1. 终止挂起的 UI 输入等待
+        if self._input_future and not self._input_future.done():
+            print("[Engine] Cancelling pending input request...")
+            self._input_future.cancel()
+            self._input_future = None
+            self._current_request = None
+            
+        # 2. 如果未来有其他的后台任务 (如技能冷却计时器), 在这里取消
+        # for task in self._background_tasks: task.cancel()
+        
+        print("[Engine] Shutdown complete.")
 
     def _switch_turn(self):
         """切换回合"""
@@ -255,7 +300,7 @@ class GameEngine:
         if not ent.nowmovable:
             print(f"Entity {ent.name} cannot move this turn.")
             return
-        move_range= self._calc_movable_positions(ent)
+        move_range= self.calc_movable_positions(ent)
         target_pos = tuple(response.get("target_position")) if response.get("target_position") else None
         if not target_pos or target_pos not in move_range:
             print(f"Invalid move position selected.")
@@ -278,7 +323,7 @@ class GameEngine:
         if not ent.nowattackable:
             print(f"Entity {ent.name} cannot attack this turn.")
             return
-        attackable_positions = self._calc_attackable_positions(ent)
+        attackable_positions = self.calc_attackable_positions(ent)
         target_uid = response.get("target_entity_uid")
         target_pos = response.get("target_position")
         target_ent = self.get_object(target_uid)
@@ -289,13 +334,13 @@ class GameEngine:
         if target_pos not in attackable_positions:
             print(f"Invalid attack position selected.")
             return
-        if target_ent.uid != self.game_map.get_entity_at(target_pos[0], target_pos[1]).uid:
+        if target_ent.uid != self.game_map.get_uid_at(target_pos[0], target_pos[1]):
             print(f"Target entity does not match the entity at the selected position.")
             return
         
         # 执行攻击
         self.event_bus.emit(Trigger.BEFORE_ATTACK, Context(self, source=ent, target=target_ent, position=target_pos))
-        await self._execute_attack(ent, target_ent, self._calc_attack(ent), target_pos)
+        await self.execute_attack(ent, target_ent, self.calc_attack(ent), target_pos)
         ent.action_state.Attackable = False
         self.event_bus.emit(Trigger.AFTER_ATTACK, Context(self, source=ent, target=target_ent, position=target_pos))
 
@@ -321,7 +366,11 @@ class GameEngine:
             return
 
         ent.vars[skill_name]["Value"] -= 1
-        await self.loader.funcdict[skill_info["Effect"]](self, ent, skill_name, response.get("skill_target"))
+        await self.loader.funcdict[skill_info["Effect"]](self, ent.uid)
+        if skill_info.get("AttackConflict", False):
+            ent.action_state.Attackable = False
+        if skill_info.get("MoveConflict", False):
+            ent.action_state.Movable = False
 
     async def _handle_action_spell_cast(self, current_player: PlayerState, response: dict):
         spell_index = response.get("spell_index")
@@ -400,19 +449,19 @@ class GameEngine:
 
     ## -- 面板属性 --
 
-    def _calc_attack(self, attacker: Unit) -> int:
+    def calc_attack(self, attacker: Unit) -> int:
         basic_attack = attacker.attack
         ctx = Context(self, source=attacker, value=basic_attack)
         self.event_bus.emit(Trigger.CALC_ATTACK, ctx)
         return ctx.value
     
-    def _calc_move_range(self, unit: Unit) -> int:
+    def calc_move_range(self, unit: Unit) -> int:
         basic_move_range = unit.move_range
         ctx = Context(self, source=unit, value=basic_move_range)
         self.event_bus.emit(Trigger.CALC_MOVE_RANGE, ctx)
         return ctx.value
 
-    def _calc_attack_range(self, unit: Unit) -> Tuple[int, int]:
+    def calc_attack_range(self, unit: Unit) -> Tuple[int, int]:
         basic_attack_range = unit.attack_range
         ctx = Context(self, source=unit, value=basic_attack_range)
         self.event_bus.emit(Trigger.CALC_ATTACK_RANGE, ctx)
@@ -420,9 +469,9 @@ class GameEngine:
 
     ## -- 结合事件系统的计算 --
     
-    def _calc_attackable_positions(self, unit: Unit) -> List[Tuple[int, int]]:
+    def calc_attackable_positions(self, unit: Unit) -> List[Tuple[int, int]]:
         """计算单位当前可攻击的位置"""
-        attack_range = self._calc_attack_range(unit)
+        attack_range = self.calc_attack_range(unit)
         attack_positions = self.game_map.calc_range_entity_positions(unit, attack_range)
         ret : List[Tuple[int, int]] = []
         for p in attack_positions:
@@ -432,10 +481,9 @@ class GameEngine:
         ctx = Context(self, source=unit, value=ret)
         self.event_bus.emit(Trigger.CALC_ATTACK_POSITIONS, ctx)
         return ctx.value
-        
     
-    def _calc_movable_positions(self, unit: Unit) -> List[Tuple[int, int]]:
-        move_range = self._calc_move_range(unit)
+    def calc_movable_positions(self, unit: Unit) -> List[Tuple[int, int]]:
+        move_range = self.calc_move_range(unit)
         move_positions = self.game_map.calc_range_empty_positions(unit, move_range, ignore_obstacles= "飞行" in unit.skills)
 
         for p in move_positions:
@@ -449,7 +497,21 @@ class GameEngine:
 
     ## -- 战斗流程 --
 
-    async def _execute_attack(self, attacker: Unit, defender: GameObject, attack: int, position: Tuple[int, int]):
+    async def _damage(self, attacker: GameObject, defender: GameObject, damage: int, position: Tuple[int, int]):
+        """造成伤害的接口, 触发死亡和击杀事件"""
+        defender.hp -= damage
+        print(f"{attacker.name} deals {damage} damage to {defender.name}!")
+
+        if defender.hp <= 0:
+            print(f"{defender.name} has been killed!")
+            await self.event_bus.async_emit(Trigger.ON_DEATH, Context(self, source=defender, target=attacker, value=damage, position=position))
+            await self.event_bus.async_emit(Trigger.ON_KILL, Context(self, source=attacker, target=defender, value=damage, position=position))
+            # 确认是否死亡 (可能被某些技能反伤或免疫了)
+            if defender.hp <= 0:
+                self.game_map.remove_entity(defender)
+                del self.entities[defender.uid]
+
+    async def execute_attack(self, attacker: Unit, defender: GameObject, attack: int, position: Tuple[int, int]):
         """执行攻击逻辑 (包含 EventBus 触发)"""
         # 1. 触发攻击前 (Before Attack) - 可能被技能打断
         ctx = Context(self, source=attacker, target=defender, position=position)
@@ -461,41 +523,18 @@ class GameEngine:
         dmg_ctx = Context(self, source=attacker, target=defender, value=attack, position=position)
         self.event_bus.emit(Trigger.CALC_DAMAGE, dmg_ctx)
         final_damage = dmg_ctx.value
-        
-        # 3. 结算 HP
-        defender.hp -= final_damage
-        print(f"{attacker.name} attacks {defender.name} for {final_damage} damage!")
-        
-        # 4. 触发攻击后 (溅射、反伤等)
-        # post_ctx = Context(self, source=attacker, target=defender, value=final_damage, position=position)
-        # await self.event_bus.async_emit(Trigger.ON_ATTACK, post_ctx)
 
-        # 5. 触发攻击事件
+        # 3. 触发攻击事件
         damage_ctx = Context(self, source=attacker, target=defender, value=final_damage, position=position)
         await self.event_bus.async_emit(Trigger.ON_ATTACK, damage_ctx)
         
-        # 6. 死亡判定
-        if defender.hp <= 0:
-            print(f"{defender.name} has been killed!")
-            await self.event_bus.async_emit(Trigger.ON_DEATH, Context(self, source=defender, target=attacker, value=final_damage, position=position))
-            await self.event_bus.async_emit(Trigger.ON_KILL, Context(self, source=attacker, target=defender, value=final_damage, position=position))
-            # 7. 确认是否死亡
-            if defender.hp <= 0:
-                # 从地图和实体列表中移除
-                self.game_map.remove_entity(defender)
-                del self.entities[defender.uid]
+        # 4. 造成伤害
+        await self._damage(attacker, defender, damage_ctx.value, position)
 
-    async def _execute_real_damage(self, attacker: GameObject, defender: GameObject, damage: int, position: Tuple[int, int]):
-        defender.hp -= damage
-        print(f"{attacker.name} deals {damage} real damage to {defender.name}!")
-
-        if defender.hp <= 0:
-            print(f"{defender.name} has been killed by real damage!")
-            await self.event_bus.async_emit(Trigger.ON_DEATH, Context(self, source=defender, target=attacker, value=damage, position=position))
-            # 确认是否死亡
-            if defender.hp <= 0:
-                self.game_map.remove_entity(defender)
-                del self.entities[defender.uid]
+    async def execute_real_damage(self, attacker: GameObject, defender: GameObject, damage: int, position: Tuple[int, int]):
+        
+        """直接造成伤害, 不触发攻击事件 (如反伤)"""
+        await self._damage(attacker, defender, damage, position)
 
     ## --- 实体管理 ---
 
@@ -524,6 +563,21 @@ class GameEngine:
         await self.event_bus.async_emit(Trigger.ON_SPAWN, Context(self, source=building))
         
         return building
-    
+        
     ## -- 其他操作 --
-    # 治疗, 晋升,
+    # 治疗, 晋升, 
+
+    async def heal(self, healer: GameObject, target: GameObject, heal_amount: int, position: Tuple[int, int]):
+        """治疗接口, 触发治疗事件"""
+        heal_amount = min(heal_amount, target.max_hp - target.hp)
+        target.hp += heal_amount 
+        print(f"{healer.name} heals {target.name} for {heal_amount} HP!")
+        await self.event_bus.async_emit(Trigger.ON_HEAL, Context(self, source=healer, target=target, value=heal_amount, position=position))
+
+    async def promote(self, unit: Unit, keep_hp: bool = False):
+        """晋升接口, 触发晋升事件"""
+        unit.promoted = True
+        if not keep_hp:
+            unit.hp = unit.max_hp
+        print(f"{unit.name} has been promoted!")
+        await self.event_bus.async_emit(Trigger.ON_PROMOTE, Context(self, source=unit))

@@ -432,7 +432,7 @@
         "Skills": {
             "裸衣": {
                 "Type": "ActiveSkill",
-                "Effect": "Interroll",
+                "Effect": "naked",
                 "MoveConflict": false,
                 "AttackConflict": false
             }

@@ -1,8 +1,8 @@
 import asyncio
 from typing import Optional, Dict, Any
-from .engine import GameEngine, UIRequest, PlayerState
-from .modes import baseMode
-from .event import Trigger, Context
+from engine import GameEngine, UIRequest, PlayerState
+from modes import baseMode
+from event import Trigger, Context
 
 class GameSession:
     """

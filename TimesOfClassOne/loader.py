@@ -5,7 +5,7 @@ import json5
 import os
 import importlib
 
-from .entities import Unit, Building
+from entities import Unit, Building
 
 class loader:
     """负责加载文件, 并作为蓝图生成兵种和建筑实例"""
@@ -30,7 +30,7 @@ class loader:
             s= info.get("Skills", {})
         elif stat_type == "buff":
             self.buff_stats[name] = info
-            s= info
+            s= {name: info}
         elif stat_type == "mode":
             self.mode_stats[name] = info
             s= {}

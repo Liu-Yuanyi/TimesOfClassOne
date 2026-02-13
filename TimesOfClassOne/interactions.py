@@ -2,9 +2,9 @@ from typing import Optional, List, Any, Dict
 # 这里为了避免循环引用，使用 TYPE_CHECKING
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from .engine import GameEngine
+    from engine import GameEngine
 
-from .engine import UIRequest
+from engine import UIRequest
 
 # --- 通用交互辅助函数 ---
 # 这些函数只是对 engine.request_input 的包装，方便技能编写者使用。

@@ -1,0 +1,32 @@
+{
+    "啊？":{
+        "Type": "Passive",
+        "Trigger": "ON_TURN_START",
+        "Role": "GLOBAL",
+        "Effect": "Ah_buff"
+    },
+    "魅惑":{
+        "Type":"PassiveSkill",
+        "Trigger":"ON_TURN_START",
+        "Effect":"Charm_buff",
+        "Role": "GLOBAL"
+    },
+    "尚文1":{
+        "Type":"PassiveSkill",
+        "Trigger":"CALC_ATTACK",
+        "Effect":"Shangwen_buff1",
+        "Role": "SOURCE"
+    },
+    "尚文2":{
+        "Type":"PassiveSkill",
+        "Trigger":"ON_TURN_START",
+        "Effect":"Shangwen_buff2",
+        "Role": "GLOBAL"
+    },
+    "眩晕":{
+        "Type":"PassiveSkill",
+        "Trigger":"ON_TURN_START",
+        "Effect":"Dizzy_buff",
+        "Role": "GLOBAL"
+    }
+}

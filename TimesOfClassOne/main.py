@@ -1,7 +1,7 @@
 import pygame
 import asyncio
 import sys
-from TimesOfClassOne.ui import SceneManager, TitleScene
+from ui import SceneManager, TitleScene
 
 # 设置屏幕参数
 SCREEN_WIDTH = 1024

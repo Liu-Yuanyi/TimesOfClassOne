@@ -1,5 +1,6 @@
 {
     "default_map":{
+        "Name": "default_map",
         "Width": 20,
         "Height": 20,
         "Entities": [

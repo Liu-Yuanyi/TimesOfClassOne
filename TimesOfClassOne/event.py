@@ -1,6 +1,10 @@
 from enum import Enum, auto
-from typing import List, Dict, Any, Callable
+from typing import List, Dict, Any, Callable, TYPE_CHECKING
 from inspect import iscoroutinefunction
+
+if TYPE_CHECKING:
+    from engine import GameEngine
+    from entities import GameObject
 
 class Trigger(Enum):
     """
@@ -18,6 +22,7 @@ class Trigger(Enum):
 
     # --- 流程事件类 (Flow Events) ---
     ON_GAME_START = "ON_GAME_START"      # 游戏开始
+    ON_GAME_OVER = "ON_GAME_OVER"        # 游戏结束 (携带胜负信息)
     ON_TURN_START = "ON_TURN_START"      # 回合开始
     ON_INPUT_REQUEST = "ON_INPUT_REQUEST" # 请求输入时
     ON_TURN_END = "ON_TURN_END"        # 回合结束
@@ -39,17 +44,18 @@ class Trigger(Enum):
     ON_HEAL = "ON_HEAL"            # 治疗时
     ON_PROMOTE = "ON_PROMOTE"         # 单位晋升时
 
+TriggerListForSkill : Dict[str, List[Trigger]] = {"sync":["CALC_ATTACK", "CALC_ATTACK_RANGE", "CALC_ATTACK_POSITIONS", "CALC_MOVE_RANGE", "CALC_DAMAGE", "CALC_COST", "CALC_HEAL"],"async":["ON_TURN_START", "ON_TURN_END", "ON_SPAWN", "ON_BUILD", "BEFORE_MOVE", "ON_MOVE", "BEFORE_ATTACK", "ON_ATTACK", "AFTER_ATTACK", "ON_KILL", "ON_DEATH", "ON_HEAL", "ON_PROMOTE"]}
 
 class Context:
     """
-    事件上下文对象。
+    事件上下文对象。: "GameEngine", source: "GameObject"=None, target: "GameObject"=None, value: Any
     在事件传播过程中携带所有必要的数据，可以在Handler通过修改该对象
     来影响后续的计算结果 (如修改 value 值)。
     """
     def __init__(self, engine, source=None, target=None, value=0, position=None, **kwargs):
-        self.engine = engine  # 这里的 engine 就是 Engine 实例
-        self.source = source  # 触发事件的主体 (Attacker)
-        self.target = target  # 事件的目标 (Defender/Target Pos)
+        self.engine : "GameEngine" = engine  # 这里的 engine 就是 Engine 实例
+        self.source : "GameObject" = source  # 触发事件的主体 (Attacker)
+        self.target : "GameObject" = target  # 事件的目标 (Defender/Target Pos)
         self.value = value    # 传递的数值 (如伤害值, 治疗量, 属性值)
         self.position = position  # 相关位置 (如攻击位置, 移动目标位置)
         self.data = kwargs    # 额外的元数据 (如 'skill_name', 'hit_pos')

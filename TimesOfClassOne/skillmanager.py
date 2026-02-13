@@ -1,10 +1,9 @@
 from typing import TYPE_CHECKING, List, Callable
-from .event import Trigger, Context
-from .skills import SKILL_REGISTRY
+from event import Trigger, Context
 import inspect
-from .entities import GameObject, Unit, Building
+from entities import GameObject, Unit, Building
 if TYPE_CHECKING:
-    from .engine import GameEngine
+    from engine import GameEngine
 
 
 class SkillManager:
@@ -22,10 +21,10 @@ class SkillManager:
         L = self._collect_skills_and_buffs(trigger, ctx)
         
         # 依次执行
-        for _, _, _, func in L:
+        for priority, uid, name, func in L:
             if inspect.iscoroutinefunction(func):
                 raise RuntimeError("Cannot call async skill in sync trigger")
-            func(ctx)
+            func(ctx, uid)# 需要传入uid以便知道是哪个实体的技能/buff
             if ctx.is_stopped:
                 break
     
@@ -34,12 +33,12 @@ class SkillManager:
         L = self._collect_skills_and_buffs(trigger, ctx)
 
         # 依次执行
-        for _, _, _, func in L:
+        for priority, uid, name, func in L:
             # 兼容同步和异步函数
             if inspect.iscoroutinefunction(func):
-                await func(ctx)
+                await func(ctx, uid)
             else:
-                func(ctx)
+                func(ctx, uid)
             if ctx.is_stopped:
                 break
 
