@@ -6,7 +6,8 @@ if TYPE_CHECKING:
 class GameMap:
     """游戏地图类，负责存储地图信息和提供地图相关的功能"""
     """同时维护实体坐标和地图坐标的统一, 也即需要在每个函数后边设置置实体坐标的代码, 以保证地图和实体坐标的一致性"""
-    def __init__(self, map_info: Dict[str, Any]):
+    def __init__(self, map_info: Dict[str, Any], engine: "GameEngine"):
+        self.engine = engine
         self.name = map_info.get("Name", "Unnamed Map")
         self.width = map_info.get("Width", 20)
         self.height = map_info.get("Height", 20)
@@ -101,7 +102,7 @@ class GameMap:
         if self.out_of_bounds(x, y):
             return None
         return self.matrix[x][y]
-    
+
     # range 相关:
     # rule.md 中说:表示范围的记号主要分为三种, +代表曼哈顿距离, \*代表切比雪夫距离, -代表只能沿直线. 比如\*3为以某一位置为中心的7\*7的正方形范围, 总共49格; 而+2是一个斜45度的一个锯齿方形区域, 总共13格; -5是一个大的十字, 总共21格. 当然也有一些特殊的范围, 比如迈步哥的范围是国象的马步, 不算起始位置总共八格. 当然, 如果这个范围是相对于一个大于1\*1的单位描述的, 那么则会相应的变形. 比如一个2\*2的建筑的+3范围, 事实上(不算建筑本身的四格)有36格.
 
@@ -112,7 +113,7 @@ class GameMap:
     # 除了-, 其他都可以深搜或广搜, 但是要注意实体大小和障碍物的影响
 
     def calc_range_positions(self, entity: GameObject, range_info: Dict[str, Any]) -> List[Tuple[int, int]]:
-        """计算以entity为中心，满足range_info条件的格子位置列表"""
+        """计算以entity为中心，位于range_info内的格子位置列表"""
         positions = set()
         
         # 1. 基础信息解析

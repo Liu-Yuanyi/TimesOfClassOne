@@ -11,6 +11,7 @@ from modes import baseMode, GameOver
 from loader import loader
 from maps import GameMap 
 from skillmanager import SkillManager
+from inspect import iscoroutinefunction
 
 # --- UI 交互协议定义 ---
 
@@ -39,16 +40,17 @@ class PlayerState:
     """玩家资源状态"""
     player_id: int
     _name: Optional[str] = None
-    gold: int = 0
-    wood: int = 0
+    resources: Dict[str, int] = field(default_factory=lambda: {"Gold": 0, "Wood": 0})
     is_active: bool = False
     banned_units: List[str] = field(default_factory=list)
     chosen_units: List[str] = field(default_factory=list)
-    banned_constructions: List[str] = field(default_factory=list)
-    chosen_constructions: List[str] = field(default_factory=list)
+    banned_buildings: List[str] = field(default_factory=list)
+    chosen_buildings: List[str] = field(default_factory=list)
     banned_spells: List[str] = field(default_factory=list)
     chosen_spells: List[str] = field(default_factory=list)
     spells_casts_left: Dict[int, int] = field(default_factory=dict)
+
+    variables: Dict[str, Any] = field(default_factory=dict)
 
     @property
     def name(self) -> str:
@@ -95,6 +97,8 @@ class GameEngine:
         # 初始化系统
         self._init_systems()
 
+        self._init_global_vars()
+
         # 动作分发(Dispatcher)
         self._action_handlers = {
             "entity_move": self._handle_action_move,
@@ -124,7 +128,7 @@ class GameEngine:
         map_stats = self.loader.map_stats.get(self.map_name)
         if not map_stats:
             raise ValueError(f"Map stats not found for: {self.map_name}")
-        self.game_map = GameMap(map_stats)
+        self.game_map = GameMap(map_stats, self)
         for ent in map_stats.get("entities", []):
             # 这里不调用 spawn_unit, 因为不触发事件
             if ent["Type"] == "Unit":
@@ -142,6 +146,7 @@ class GameEngine:
             else:
                 raise ValueError(f"Unknown entity type in map: {ent['Type']}")
 
+
     def _init_systems(self):
         """初始化技能管理器、规则系统等"""
         self.skill_manager = SkillManager(self)
@@ -155,19 +160,45 @@ class GameEngine:
         for trigger_name in TriggerListForSkill["async"]:
             eb.subscribe(Trigger(trigger_name), partial(sm.async_skill_trigger, trigger=Trigger(trigger_name)))
 
-        # 初始化模式 (绑定胜利条件监听)
+        # 初始化模式 (绑定胜利条件监听, 以及其他的事情)
         if self.mode:
             self.mode.initialize(self)
 
+    def _init_global_vars(self):
+        """扫描所有选中的单位/建筑, 初始化全局变量("Type"为"Global"的)"""
+        for pid, player in self.players.items():
+            # 1. 扫描选中的单位
+            for unit_name in player.chosen_units:
+                stats = self.loader.unit_stats.get(unit_name, {})
+                vars = stats.get("Variables", {})
+                for var_name, var_info in vars.items():
+                    if var_info.get("Type") == "Global":
+                        self.get_global_var(pid, var_name, var_info.get("DefaultValue", 0))
+            # 2. 扫描选中的建筑
+            for building_name in player.chosen_buildings:
+                stats = self.loader.building_stats.get(building_name, {})
+                vars = stats.get("Variables", {})
+                for var_name, var_info in vars.items():
+                    if var_info.get("Type") == "Global":
+                        self.get_global_var(pid, var_name, var_info.get("DefaultValue", 0))
+            # 3. 扫描选中的法术
+            for spell_name in player.chosen_spells:
+                stats = self.loader.mode_stats[self.mode.name].get("Spells", [])
+                spell_stats = next((s for s in stats if s["Name"] == spell_name), {})
+                vars = spell_stats.get("Variables", {})
+                for var_name, var_info in vars.items():
+                    if var_info.get("Type") == "Global":
+                        self.get_global_var(pid, var_name, var_info.get("DefaultValue", 0))
+
     # --- 数据接口 ---
 
-    def get_GLOBAL_var(self, player_id: int, key: str, default=None) -> Any:
+    def get_global_var(self, player_id: int, key: str, default=None) -> Any:
         if key in self.player_vars[player_id]:
             return self.player_vars[player_id][key]
         self.player_vars[player_id][key] = default
         return default
     
-    def set_GLOBAL_var(self, player_id: int, key: str, value: Any):
+    def set_global_var(self, player_id: int, key: str, value: Any):
         self.player_vars[player_id][key] = value
     
     def get_object(self, uid: int) -> Optional[GameObject]:
@@ -245,18 +276,7 @@ class GameEngine:
         
         turn_active = True
         while turn_active:
-            # 1. 构造主阶段状态上下文
-            # 筛选出当前玩家所有还能动的单位 UID
-            # 注意建筑可以随时被拆除
-            operable_entities = [
-                ent.uid for ent in self.entities.values() 
-                if ((ent.operable or isinstance(ent, Building)) and ent.owner_id == current_player.player_id)
-            ]
-            operable_spells = [
-                spell_index for spell_index, casts_left in current_player.spells_casts_left.items()
-            ]
             
-            # 2. 发送主菜单请求, response 格式见 response.md
             try:
                 response : dict = await self.request_input(UIRequest(
                     request_id="main_turn_menu",
@@ -264,8 +284,6 @@ class GameEngine:
                     type="MAIN_TURN_MENU",
                     message="请选择行动",
                     validation={
-                        "operable_entities": operable_entities,
-                        "operable_spells": operable_spells,
                         "can_end_turn": True
                     },
                     allow_cancel=False
@@ -290,66 +308,37 @@ class GameEngine:
     # --- 动作处理 (Action Handlers) ---
 
     async def _handle_action_move(self, current_player: PlayerState, response: dict):
+
         ent = self.get_object(response.get("entity_uid"))
-        if not ent or ent.owner_id != current_player.player_id:
-            print(f"Invalid entity selected for move.")
-            return
-        if not isinstance(ent, Unit):
-            print(f"Selected entity is not a unit and cannot move.")
-            return
-        if not ent.nowmovable:
-            print(f"Entity {ent.name} cannot move this turn.")
-            return
         move_range= self.calc_movable_positions(ent)
         target_pos = tuple(response.get("target_position")) if response.get("target_position") else None
-        if not target_pos or target_pos not in move_range:
-            print(f"Invalid move position selected.")
-            return
+
         # 执行移动
         self.event_bus.emit(Trigger.BEFORE_MOVE, Context(self, source=ent, position=target_pos))
         self.game_map.move_entity(ent, target_pos[0], target_pos[1])
-        ent.action_state.Movable = False
         print(f"{ent.name} moved to {target_pos}.")
+
+        ent.action_state.Movable = False
         self.event_bus.emit(Trigger.ON_MOVE, Context(self, source=ent, position=target_pos))
 
     async def _handle_action_attack(self, current_player: PlayerState, response: dict):
         ent = self.get_object(response.get("entity_uid"))
-        if not ent or ent.owner_id != current_player.player_id:
-            print(f"Invalid entity selected for attack.")
-            return
-        if not isinstance(ent, Unit) or (isinstance(ent, Building) and not ent.attackable):
-            print(f"Selected entity cannot attack.")
-            return
-        if not ent.nowattackable:
-            print(f"Entity {ent.name} cannot attack this turn.")
-            return
         attackable_positions = self.calc_attackable_positions(ent)
         target_uid = response.get("target_entity_uid")
         target_pos = response.get("target_position")
         target_ent = self.get_object(target_uid)
-        if not target_ent:
-            print(f"Target entity does not exist.")
-            return
-        
-        if target_pos not in attackable_positions:
-            print(f"Invalid attack position selected.")
-            return
-        if target_ent.uid != self.game_map.get_uid_at(target_pos[0], target_pos[1]):
-            print(f"Target entity does not match the entity at the selected position.")
-            return
         
         # 执行攻击
         self.event_bus.emit(Trigger.BEFORE_ATTACK, Context(self, source=ent, target=target_ent, position=target_pos))
+        print(f"{ent.name} attacks {target_ent.name} at {target_pos}.")
         await self.execute_attack(ent, target_ent, self.calc_attack(ent), target_pos)
+
         ent.action_state.Attackable = False
         self.event_bus.emit(Trigger.AFTER_ATTACK, Context(self, source=ent, target=target_ent, position=target_pos))
 
     async def _handle_action_use_skill(self, current_player: PlayerState, response: dict):
         # 读取信息并判断合法性
         ent = self.get_object(response.get("entity_uid"))
-        if not ent or ent.owner_id != current_player.player_id:
-            print(f"Invalid entity selected for skill.")
-            return
         skill_name = response.get("skill_name")
         skill_info = ent.skills.get(skill_name)
         if not skill_info or skill_info.get("Type") != "ActiveSkill":
@@ -366,7 +355,9 @@ class GameEngine:
             return
 
         ent.vars[skill_name]["Value"] -= 1
+        print(f"{ent.name} uses skill {skill_name}.")
         await self.loader.funcdict[skill_info["Effect"]](self, ent.uid)
+        
         if skill_info.get("AttackConflict", False):
             ent.action_state.Attackable = False
         if skill_info.get("MoveConflict", False):
@@ -379,16 +370,15 @@ class GameEngine:
             return
         current_player.spells_casts_left[spell_index] -= 1
         spell_info = self.loader.mode_stats[self.mode.name]["Spells"][spell_index]
-        await self.loader.funcdict[spell_info["Effect"]](self, current_player, spell_index, response.get("spell_target"))
+        func = self.loader.funcdict[spell_info["Effect"]]
+        print(f"{current_player.name} casts spell {spell_info['Name']}.")
+        if iscoroutinefunction(func):
+            await func(self, current_player.player_id, spell_index, response.get("spell_target"))
+        else:
+            func(self, current_player.player_id, spell_index, response.get("spell_target"))
 
     async def _handle_action_tear_down(self, current_player: PlayerState, response: dict):
         ent = self.get_object(response.get("entity_uid"))
-        if not ent or ent.owner_id != current_player.player_id:
-            print(f"Invalid entity selected for tear down.")
-            return
-        if not isinstance(ent, Building):
-            print(f"Selected entity is not a building.")
-            return
         # 执行拆除
         self.game_map.remove_entity(ent)
         del self.entities[ent.uid]
@@ -531,6 +521,8 @@ class GameEngine:
         # 4. 造成伤害
         await self._damage(attacker, defender, damage_ctx.value, position)
 
+        await self.event_bus.async_emit(Trigger.AFTER_ATTACK, Context(self, source=attacker, target=defender, value=damage_ctx.value, position=position))
+
     async def execute_real_damage(self, attacker: GameObject, defender: GameObject, damage: int, position: Tuple[int, int]):
         
         """直接造成伤害, 不触发攻击事件 (如反伤)"""
@@ -569,10 +561,18 @@ class GameEngine:
 
     async def heal(self, healer: GameObject, target: GameObject, heal_amount: int, position: Tuple[int, int]):
         """治疗接口, 触发治疗事件"""
-        heal_amount = min(heal_amount, target.max_hp - target.hp)
-        target.hp += heal_amount 
-        print(f"{healer.name} heals {target.name} for {heal_amount} HP!")
-        await self.event_bus.async_emit(Trigger.ON_HEAL, Context(self, source=healer, target=target, value=heal_amount, position=position))
+        ctx = Context(self, source=healer, target=target, value=heal_amount, position=position)
+        await self.event_bus.async_emit(Trigger.CALC_HEAL, ctx)
+
+        heal_amount = min(ctx.value, target.max_hp - target.hp)
+
+        if heal_amount <= 0:
+            return
+
+        target.hp += heal_amount
+
+        print(f"{healer.name} heals {target.name} for {ctx.value} HP!")
+        await self.event_bus.async_emit(Trigger.ON_HEAL, Context(self, source=healer, target=target, value=ctx.value, position=position))
 
     async def promote(self, unit: Unit, keep_hp: bool = False):
         """晋升接口, 触发晋升事件"""
@@ -581,3 +581,25 @@ class GameEngine:
             unit.hp = unit.max_hp
         print(f"{unit.name} has been promoted!")
         await self.event_bus.async_emit(Trigger.ON_PROMOTE, Context(self, source=unit))
+
+    def buff_unit(self, unit: GameObject, buff_name: str, duration: Optional[int] = None):
+        """给单位添加 Buff"""
+        unit.buffs[buff_name] = loader.buff_stats[buff_name]
+        if duration:
+            unit.duration[buff_name] = duration
+        print(f"{unit.name} gains buff {buff_name} for {duration} turns.")
+
+
+ # 更多的辅助函数
+    def costlist(self, player_id:int) -> Dict[str, Dict[str, int]]:
+        """返回一个的cost字典"""
+        def calc_one(n:str, basecost: Dict[str, int]) -> Dict[str, int]:
+            ctx= Context(self, value= player_id, name= n, cost= basecost)
+            self.event_bus.emit(Trigger.CALC_COST, ctx)
+            return ctx.cost
+        ret={}
+        for name, basecost in self.players[player_id].chosen_units.items():
+            ret[name]=calc_one(name, basecost)
+        for name, basecost in self.players[player_id].chosen_buildings.items():
+            ret[name]=calc_one(name, basecost)
+        return ret

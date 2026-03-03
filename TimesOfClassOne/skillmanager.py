@@ -74,7 +74,10 @@ class SkillManager:
 
     def _collect_filter(self, result_list: list, trigger: Trigger, role: str, ent, name: str, info: dict):
         """辅助函数：过滤并收集"""
-        if info.get("Type") not in ("PassiveSkill", "Buff"): return
+        if info.get("Type") not in ["PassiveSkill", "ActiveSkill", "Static"]:
+            print(f"[Warning] Unknown skill/buff type {info.get('Type')} for {name}")
+            return
+        if info.get("Type") != "PassiveSkill": return
         if info.get("Trigger") != trigger: return
         if info.get("Role") != role: return
 

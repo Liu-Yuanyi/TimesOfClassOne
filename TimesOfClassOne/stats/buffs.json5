@@ -1,32 +1,51 @@
 {
+    "裸衣":{
+        "Trigger": "CALC_MOVE_RANGE",
+        "Role": "GLOBAL",
+        "Effect": "Naked_buff",
+        //还需要标记是正面buff还是负面buff
+        "Nature": "Positive"
+    },
     "啊？":{
-        "Type": "Passive",
         "Trigger": "ON_TURN_START",
         "Role": "GLOBAL",
-        "Effect": "Ah_buff"
+        "Effect": "Ah_buff",
+        "Nature": "Negative"
     },
     "魅惑":{
-        "Type":"PassiveSkill",
         "Trigger":"ON_TURN_START",
         "Effect":"Charm_buff",
-        "Role": "GLOBAL"
+        "Role": "GLOBAL",
+        "Nature": "Negative"
     },
     "尚文1":{
-        "Type":"PassiveSkill",
         "Trigger":"CALC_ATTACK",
         "Effect":"Shangwen_buff1",
-        "Role": "SOURCE"
+        "Role": "SOURCE",
+        "Nature": "Negative"
     },
     "尚文2":{
-        "Type":"PassiveSkill",
         "Trigger":"ON_TURN_START",
         "Effect":"Shangwen_buff2",
-        "Role": "GLOBAL"
+        "Role": "GLOBAL",
+        "Nature": "Negative"
+    },
+    "领袖1":{
+        "Trigger":"CALC_ATTACK",
+        "Effect":"Leader_buff1",
+        "Role": "SOURCE",
+        "Nature": "Positive"
+    },
+    "领袖2":{
+        "Trigger":"CALC_ATTACK",
+        "Effect":"Leader_buff2",
+        "Role": "SOURCE",
+        "Nature": "Positive"
     },
     "眩晕":{
-        "Type":"PassiveSkill",
         "Trigger":"ON_TURN_START",
         "Effect":"Dizzy_buff",
-        "Role": "GLOBAL"
+        "Role": "GLOBAL",
+        "Nature": "Negative"
     }
 }

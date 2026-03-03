@@ -7,6 +7,9 @@ import importlib
 
 from entities import Unit, Building
 
+def default_true(*args, **kwargs):
+    return True
+
 class loader:
     """负责加载文件, 并作为蓝图生成兵种和建筑实例"""
     """mode貌似不需要在这里加载, 直接在mode模块里写死就行了, 但是还是预留了接口, 方便以后扩展"""
@@ -16,6 +19,7 @@ class loader:
         self.buff_stats: Dict[str, Dict[str, Any]] = {}
         self.mode_stats: Dict[str, Dict[str, Any]] = {}
         self.map_stats: Dict[str, Dict[str, Any]] = {}
+        
         self.funcdict: Dict[str, Any] = {}
 
     def append_one(self, name:str, info:Dict[str, Any], stat_type: str, skill_module: str = "skills"):
@@ -47,12 +51,28 @@ class loader:
                     print(f"[Loader] Warning: Skill {skill_name} already exists in funcdict. Overwriting.")
                 try:
                     func = getattr(importlib.import_module(f"{skill_module}"), skill_info["Effect"])
+
                     self.funcdict[skill_info["Effect"]] = func
                     print(f"[Loader] Registered skill effect: {skill_info['Effect']} from {skill_name}")
+
                 except (ImportError, AttributeError) as e:
                     print(f"[Loader] Error loading skill effect: {skill_info['Effect']} for skill {skill_name}. Error: {e}")
 
-
+                
+                # 所有主动技能都有一个默认的条件函数, 如果JSON里没有指定的话就用这个
+                # 条件函数的名字(key)是这个Effect后面加上"_check", 例如 "ThankYou" 的条件函数就是 "ThankYou_check"
+                if skill_info.get("Type") == "ActiveSkill":
+                    check_func_name = skill_info["Effect"] + "_check"
+                    if check_func_name in self.funcdict:
+                        print(f"[Loader] Warning: Check function {check_func_name} already exists in funcdict. Overwriting.")
+                    try:
+                        check_func = getattr(importlib.import_module(f"{skill_module}"), check_func_name)
+                        self.funcdict[check_func_name] = check_func
+                        print(f"[Loader] Registered skill check function: {check_func_name} for skill {skill_name}")
+                    except (ImportError, AttributeError) as e:
+                        print(f"[Loader] No check function found for {check_func_name}. Using default_true. Error: {e}")
+                        self.funcdict[check_func_name] = default_true
+                
     def append_stats(self, filepath: str, stat_type: str):
         """加载指定类型的stats文件"""
         if not os.path.exists(filepath):
@@ -110,3 +130,18 @@ class loader:
                         }
 
         return b
+
+    def info(self , name:str) -> Dict[str, Any]:
+        """获取某类实体的详细信息"""
+        if name in self.unit_stats:
+            return self.unit_stats[name]
+        elif name in self.building_stats:
+            return self.building_stats[name]
+        elif name in self.buff_stats:
+            return self.buff_stats[name]
+        elif name in self.mode_stats:
+            return self.mode_stats[name]
+        elif name in self.map_stats:
+            return self.map_stats[name]
+        else:
+            raise ValueError(f"Stats not found for: {name}")

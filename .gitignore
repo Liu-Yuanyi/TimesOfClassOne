@@ -2,3 +2,4 @@ tmp/
 .vscode/
 .TimesOfClassOne TMP/
 server/
+TimesOfClassOne/__pycache__/

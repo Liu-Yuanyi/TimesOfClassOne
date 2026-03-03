@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import List, Dict, Any, Callable, TYPE_CHECKING
+from typing import List, Dict, Any, Callable,Optional, TYPE_CHECKING
 from inspect import iscoroutinefunction
 
 if TYPE_CHECKING:
@@ -19,6 +19,7 @@ class Trigger(Enum):
     CALC_DAMAGE = "CALC_DAMAGE"                 # 计算受到的伤害 (减伤, 护甲)
     CALC_COST = "CALC_COST"                     # 计算价格
     CALC_HEAL = "CALC_HEAL"                     # 计算治疗量
+    CALC_SKILL_COST = "CALC_SKILL_COST"         # 计算技能消耗 (新增)
 
     # --- 流程事件类 (Flow Events) ---
     ON_GAME_START = "ON_GAME_START"      # 游戏开始
@@ -44,7 +45,7 @@ class Trigger(Enum):
     ON_HEAL = "ON_HEAL"            # 治疗时
     ON_PROMOTE = "ON_PROMOTE"         # 单位晋升时
 
-TriggerListForSkill : Dict[str, List[Trigger]] = {"sync":["CALC_ATTACK", "CALC_ATTACK_RANGE", "CALC_ATTACK_POSITIONS", "CALC_MOVE_RANGE", "CALC_DAMAGE", "CALC_COST", "CALC_HEAL"],"async":["ON_TURN_START", "ON_TURN_END", "ON_SPAWN", "ON_BUILD", "BEFORE_MOVE", "ON_MOVE", "BEFORE_ATTACK", "ON_ATTACK", "AFTER_ATTACK", "ON_KILL", "ON_DEATH", "ON_HEAL", "ON_PROMOTE"]}
+TriggerListForSkill : Dict[str, List[Trigger]] = {"sync":["CALC_ATTACK", "CALC_ATTACK_RANGE", "CALC_ATTACK_POSITIONS", "CALC_MOVE_RANGE", "CALC_DAMAGE", "CALC_COST", "CALC_SKILL_COST", "CALC_HEAL"],"async":["ON_TURN_START", "ON_TURN_END", "ON_SPAWN", "ON_BUILD", "BEFORE_MOVE", "ON_MOVE", "BEFORE_ATTACK", "ON_ATTACK", "AFTER_ATTACK", "ON_KILL", "ON_DEATH", "ON_HEAL", "ON_PROMOTE"]}
 
 class Context:
     """
@@ -52,15 +53,27 @@ class Context:
     在事件传播过程中携带所有必要的数据，可以在Handler通过修改该对象
     来影响后续的计算结果 (如修改 value 值)。
     """
-    def __init__(self, engine, source=None, target=None, value=0, position=None, **kwargs):
+    def __init__(self, 
+                 engine:"GameEngine", 
+                 source: Optional["GameObject"] = None, 
+                 target: Optional["GameObject"] = None, 
+                 value: int = 0, 
+                 position: Optional[tuple[int, int]] = None, 
+                 cost: Dict[str, int] = {"Gold": 0, "Wood": 0}, 
+                 name: str = "",
+                 **kwargs):
         self.engine : "GameEngine" = engine  # 这里的 engine 就是 Engine 实例
-        self.source : "GameObject" = source  # 触发事件的主体 (Attacker)
-        self.target : "GameObject" = target  # 事件的目标 (Defender/Target Pos)
-        self.value = value    # 传递的数值 (如伤害值, 治疗量, 属性值)
-        self.position = position  # 相关位置 (如攻击位置, 移动目标位置)
-        self.data = kwargs    # 额外的元数据 (如 'skill_name', 'hit_pos')
-        self.is_stopped = False
-
+        self.source : Optional["GameObject"] = source  # 触发事件的主体 (Attacker)
+        self.target : Optional["GameObject"] = target  # 事件的目标 (Defender/Target Pos)
+        self.value : int = value    # 传递的数值 (如伤害值, 治疗量, 属性值)
+        self.position : Optional[tuple[int, int]] = position  # 相关位置 (如攻击位置, 移动目标位置)
+        self.name : str = name      # 事件/技能的名字 (可选, 便于调试)
+        self.cost : Dict[str, int] = cost
+        # self.data = kwargs    # 额外的元数据 (如 'skill_name', 'hit_pos')
+        self.cost = cost
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+        self.is_stopped = False  # 用于Handler之间的通信，某个Handler可以设置 ctx.is_stopped = True 来阻止后续Handler执行
 
 class EventBus:
     """

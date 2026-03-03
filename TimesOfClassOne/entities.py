@@ -6,7 +6,7 @@ class ActionState:
     """单位或建筑的行动状态"""
     Movable: bool = False             # 本回合是否还能移动
     Attackable: bool = False          # 本回合是否还能攻击
-    MovingPoints: int = 0              # 剩余移动点数
+#   MovingPoints: int = 0             # 剩余移动点数
 
 class GameObject:
     """所有游戏实体的基类"""
@@ -28,13 +28,20 @@ class GameObject:
         self.prev_y: int = 0
         self.skills: Dict[str, Any] = {} # 技能实例
         self.buffs: Dict[str, Any] = {} # 临时属性增益/减益
+        self.duration: Dict[str, int] = {} # 技能持续时间/BUFF剩余回合数
         self.vars: Dict[str, Any] = {}  # 临时变量存储
 
     @property
     def pos(self):
         return (self.x, self.y)
+    @property
+    def position(self):
+        return (self.x, self.y)
     @pos.setter
     def pos(self, value):
+        self.x, self.y = value
+    @position.setter
+    def position(self, value):
         self.x, self.y = value
 
     @property

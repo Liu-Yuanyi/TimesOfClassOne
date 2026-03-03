@@ -46,7 +46,7 @@
             },
             "反伤":{
                 "Type":"PassiveSkill",
-                "Trigger": "ON_DAMAGE_TAKEN",
+                "Trigger": "ON_ATTACK",
                 "Effect":"ThornArmor",
                 "Role":"TARGET"
             },
@@ -106,7 +106,7 @@
                 "Type":"PassiveSkill",
                 "Trigger": "CALC_COST",
                 "Effect":"DoubleCostPerExisting",
-                "Role":"TARGET"
+                "Role":"GLOBAL"
             }
         },
         "Description":"每回合产出100金，场上每存在一个，造价翻倍。"
@@ -136,7 +136,7 @@
                 "Type":"PassiveSkill",
                 "Trigger": "CALC_COST",
                 "Effect":"DoubleCostPerExisting",
-                "Role":"TARGET"
+                "Role":"GLOBAL"
             }
         },
         "Description":"每回合产出5木，场上每存在一个，造价翻倍。"
@@ -154,7 +154,14 @@
             "Gold": 20,
             "Wood": 3
         },
-        "AlwaysNeutral": true,
+        "skills":{
+            "中立":{
+                "Type":"PassiveSkill",
+                "Trigger":"ON_SPAWN",
+                "Effect":"Neutralize",
+                "Role":"SOURCE"
+            }
+        },
         "Description":"中立建筑"
     },
     "城墙":{
@@ -170,7 +177,14 @@
             "Gold": 70,
             "Wood": 5
         },
-        "AlwaysNeutral": true,
+        "skills":{
+            "中立":{
+                "Type":"PassiveSkill",
+                "Trigger":"ON_SPAWN",
+                "Effect":"Neutralize",
+                "Role":"SOURCE"
+            }
+        },
         "Description":"中立建筑"
     },
     "箭塔":{
@@ -213,32 +227,32 @@
             "Wood": 25
         }
     },
-    "炸弹塔":{
-        "Name": "炸弹塔",
-        "Char": "炸",
-        "HP": 12,
-        "Size": {
-            "Width": 2,
-            "Height": 2
-        },
-        "Attackable": true,
-        "Attack": 5,
-        "AttackRange": {
-            "Type": "*",
-            "Min": 1,
-            "Max": 4
-        },
-        "Cost":{
-            "Gold": 370,
-            "Wood": 25
-        },
-        "Skills":{
-            "2*2":{
-                "Type":"Static"
-            }
-        },
-        "Description":"范围2*2，不分敌我，不能击中自己"
-    },
+    // "炸弹塔":{
+    //     "Name": "炸弹塔",
+    //     "Char": "炸",
+    //     "HP": 12,
+    //     "Size": {
+    //         "Width": 2,
+    //         "Height": 2
+    //     },
+    //     "Attackable": true,
+    //     "Attack": 5,
+    //     "AttackRange": {
+    //         "Type": "*",
+    //         "Min": 1,
+    //         "Max": 4
+    //     },
+    //     "Cost":{
+    //         "Gold": 370,
+    //         "Wood": 25
+    //     },
+    //     "Skills":{
+    //         "2*2":{
+    //             "Type":"Static"
+    //         }
+    //     },
+    //     "Description":"范围2*2，不分敌我，不能击中自己"
+    // },
     "导弹井":{
         "Name": "导弹井",
         "Char": "导",
@@ -262,7 +276,7 @@
                 }
             }
         },
-        "Description":"对一格造成30真实伤害，并对此格周围八格造成10溅射真实伤害(可以空打) (不分敌我，自己也受)"
+        "Description":"对*6范围内的一格造成30真实伤害，并对此格周围八格造成10溅射真实伤害(可以空打) (不分敌我，自己也受)"
     },
     "医院":{
         "Name": "医院",
@@ -289,27 +303,27 @@
         },
         "Description":"痊愈一个兵(边邻)"
     },
-    "博文诗社":{
-        "Name": "博文诗社",
-        "Char": "诗",
-        "HP": 15,
-        "Size": {
-            "Width": 2,
-            "Height": 2
-        },
-        "Attackable": false,
-        "Cost":{
-            "Gold": 200,
-            "Wood": 15
-        },
-        "Skills":{
-            "变节":{
-                "Type":"ActiveSkill",
-                "Effect":"ConvertEnemyUnit"
-            }
-        },
-        "Description":"将一个*2范围内敌兵变为我兵(该兵本回合不能操作)"
-    },
+    // "博文诗社":{
+    //     "Name": "博文诗社",
+    //     "Char": "诗",
+    //     "HP": 15,
+    //     "Size": {
+    //         "Width": 2,
+    //         "Height": 2
+    //     },
+    //     "Attackable": false,
+    //     "Cost":{
+    //         "Gold": 200,
+    //         "Wood": 15
+    //     },
+    //     "Skills":{
+    //         "变节":{
+    //             "Type":"ActiveSkill",
+    //             "Effect":"ConvertEnemyUnit"
+    //         }
+    //     },
+    //     "Description":"将一个*2范围内敌兵变为我兵(该兵本回合不能操作)"
+    // },
     "黑奴市场":{
         "Name": "黑奴市场",
         "Char": "黑",
@@ -331,6 +345,12 @@
                     "Gold":300,
                     "Wood":8
                 }
+            }
+        },
+        "Variables":{
+            "黑奴冷却":{
+                "Type":"Duration",
+                "Value":0
             }
         },
         "Description":"在市场边邻四格各召唤一个黑奴(若为空)(冷却1回合)"

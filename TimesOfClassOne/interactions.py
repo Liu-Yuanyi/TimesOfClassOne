@@ -26,7 +26,7 @@ async def ask_confirm(engine: "GameEngine", player_id: int, message: str) -> boo
     ))
     return resp.get("choice") == "yes"
 
-async def select_location(engine: "GameEngine", player_id: int, valid_positions: List[tuple], message: str = "请选择位置") -> Optional[tuple]:
+async def select_location(engine: "GameEngine", player_id: int, valid_positions: List[tuple], message: str = "请选择位置", cancelable: bool = True) -> Optional[tuple]:
     """
     通用询问: 选择地图格子
     """
@@ -38,7 +38,7 @@ async def select_location(engine: "GameEngine", player_id: int, valid_positions:
         type="SELECT_LOCATION",
         message=message,
         validation={"valid_positions": valid_positions},
-        allow_cancel=True
+        allow_cancel=cancelable
     ))
     
     if resp.get("action") == "cancel":
@@ -47,16 +47,17 @@ async def select_location(engine: "GameEngine", player_id: int, valid_positions:
     pos = resp.get("position") # 假设返回 [x, y]
     return tuple(pos) if pos else None
 
-async def select_unit_type(engine: "GameEngine", player_id: int, available_types: List[str], message: str = "请选择兵种") -> Optional[str]:
+async def select_chosen_object(engine: "GameEngine", player_id: int, available_types: List[str], message: str = "请选择兵种") -> Optional[str]:
     """
     通用询问: 从左侧兵种列表中选择一个
+    available_types 是一个字符串列表, 例如 ["轻骑兵", "箭塔", "疾行"]
     """
     req_uid = getattr(engine, "_next_uid", 0) 
 
     resp = await engine.request_input(UIRequest(
         request_id=f"type_{engine.turn_count}_{req_uid}",
         player_id=player_id,
-        type="SELECT_UNIT_TYPE",
+        type="SELECT_CHOSEN_OBJECT",
         message=message,
         validation={"options": available_types},
         allow_cancel=True
